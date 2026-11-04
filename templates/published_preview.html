@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    @media print {
+        body.hide-invigilator .invigilator-info {
+            display: none !important;
+        }
+        .no-print { display: none !important; }
+        /* പേജിന്റെ ബാക്ക്ഗ്രൗണ്ട് കളറുകൾ പ്രിന്റിൽ വരാൻ */
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+</style>
+
+<div style="max-width: 900px; margin: auto;">
+    
+    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="color: #1e293b; margin: 0;"><i class="fas fa-check-circle" style="color:#10b981;"></i> Published Seating Arrangements</h2>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            {% if role == 'admin' or role == 'faculty' %}
+                <button onclick="printSeating(true)" style="background: #10b981; color: white; padding: 8px 15px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;"><i class="fas fa-print"></i> Print with Invigilator</button>
+                <button onclick="printSeating(false)" style="background: #f59e0b; color: white; padding: 8px 15px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;"><i class="fas fa-user-slash"></i> Print w/o Invigilator</button>
+            {% else %}
+                <button onclick="window.print()" style="background: #10b981; color: white; padding: 8px 15px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;"><i class="fas fa-print"></i> Print List</button>
+            {% endif %}
+
+            {% if role == 'admin' %}
+                <a href="/admin/seatplan" style="background: #3b82f6; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Back to Seat Plan</a>
+            {% elif role == 'faculty' %}
+                <a href="/faculty/seating" style="background: #3b82f6; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Back to My Duties</a>
+            {% elif role == 'student' %}
+                <a href="/student" style="background: #3b82f6; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not grouped_data %}
+        <div style="background: white; padding: 40px; text-align: center; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <i class="fas fa-info-circle" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 15px;"></i>
+            <h3 style="color: #475569;">No Published Seating Found</h3>
+        </div>
+    {% else %}
+        {% for schedule, rooms in grouped_data.items() %}
+            {% set first_room = rooms.values() | first %}
+            
+            <div style="background: #e2e8f0; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; margin-top: 30px; border-left: 5px solid #3b82f6; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: #1e293b; font-size: 1.1rem;"><i class="fas fa-calendar-alt"></i> Exam {{ schedule }}</h3>
+                
+                {% if role == 'admin' %}
+                <button class="no-print" onclick="deleteSeating('{{ first_room.raw_date }}', '{{ first_room.raw_time }}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">
+                    <i class="fas fa-trash-alt"></i> Delete Seating
+                </button>
+                {% endif %}
+            </div>
+
+            {% for room_id, data in rooms.items() %}
+            <div style="background: white; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                
+                <div style="background: #1e293b; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="margin: 0; font-size: 1.2rem;"><i class="fas fa-door-open"></i> Room Number: <span style="color:#fbbf24;">{{ data.room_no }}</span></h3>
+                    
+                    {% if role != 'student' %}
+                    <span class="invigilator-info" style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 6px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-user-tie"></i> Invigilator: <b>{{ data.faculty }}</b>
+                        {% if role == 'admin' %}
+                        <button class="no-print" onclick="openTeacherModal('{{ data.raw_date }}', '{{ data.raw_time }}', '{{ room_id }}', '{{ data.room_no }}')" title="Change Invigilator" style="background: none; border: none; color: #fbbf24; cursor: pointer; margin-left: 5px;"><i class="fas fa-edit"></i></button>
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div style="padding: 15px; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9; text-align: left;">
+                                <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; text-align: center; color: #475569;">Seat No</th>
+                                <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569;">Register No</th>
+                                <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569;">Student Name</th>
+                                <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569;">Course</th>
+                                <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; text-align: center; color: #475569;">Bench & Side</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for st in data.students %}
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 10px; text-align: center; font-weight: bold; color: #ef4444; font-size: 1.1rem;">{{ st.seat_no }}</td>
+                                <td style="padding: 10px; font-weight: bold; color: #0f172a;">{{ st.reg_no }}</td>
+                                <td style="padding: 10px; color: #334155;">{{ st.name }}</td>
+                                <td style="padding: 10px; color: #64748b;">{{ st.dept }}</td>
+                                <td style="padding: 10px; text-align: center; color: #64748b;">Bench {{ st.bench_no }} ({{ st.side }})</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+{% if role == 'admin' %}
+<div id="reassignTeacherModal" class="modal" style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6);">
+    <div style="background:white; margin: 10% auto; padding:25px; border-radius:12px; width:400px; max-width:90%; position:relative;">
+        <span onclick="document.getElementById('reassignTeacherModal').style.display='none'" style="position:absolute; right:20px; top:20px; font-size:24px; cursor:pointer; color:red;">&times;</span>
+        <h3 style="color:#1e293b; margin-top:0;"><i class="fas fa-user-edit"></i> Change Invigilator</h3>
+        <p style="color:#64748b; font-size: 0.9rem; margin-bottom: 15px;">Room: <b id="modal_room_no" style="color:#0f172a;"></b></p>
+        
+        <input type="hidden" id="modal_exam_date">
+        <input type="hidden" id="modal_exam_time">
+        <input type="hidden" id="modal_room_id">
+        
+        <label style="font-weight:bold; color:#475569; display:block; margin-bottom:8px;">Select New Faculty:</label>
+        <select id="modal_faculty_id" class="form-control" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom: 20px;">
+            <option value="">-- Select Faculty --</option>
+            {% for f in all_faculty %}
+                <option value="{{ f.id }}">{{ f.name }}</option>
+            {% endfor %}
+        </select>
+        
+        <button onclick="submitReassign()" style="background:#10b981; color:white; border:none; padding:10px 15px; border-radius:6px; width:100%; font-weight:bold; cursor:pointer;">Update Invigilator</button>
+    </div>
+</div>
+
+<script>
+    function deleteSeating(date, session) {
+        if(confirm("Are you sure you want to permanently delete the seating arrangement for " + date + " (" + session + ")?")) {
+            fetch('/admin/delete_published_seating', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({date: date, session: session})
+            }).then(res => res.json()).then(data => {
+                if(data.status === 'success') location.reload();
+                else alert("Error: " + data.error);
+            });
+        }
+    }
+
+    function openTeacherModal(date, time, roomId, roomNo) {
+        document.getElementById('modal_exam_date').value = date;
+        document.getElementById('modal_exam_time').value = time;
+        document.getElementById('modal_room_id').value = roomId;
+        document.getElementById('modal_room_no').innerText = roomNo;
+        document.getElementById('modal_faculty_id').value = ""; // Reset dropdown
+        document.getElementById('reassignTeacherModal').style.display = 'block';
+    }
+
+    // New AJAX Submit Logic for Reassigning/Swapping
+    function submitReassign(forceSwap = false) {
+        const dateVal = document.getElementById('modal_exam_date').value;
+        const timeVal = document.getElementById('modal_exam_time').value;
+        const roomId = document.getElementById('modal_room_id').value;
+        const facultyId = document.getElementById('modal_faculty_id').value;
+
+        if(!facultyId) {
+            alert("Please select a faculty!");
+            return;
+        }
+
+        fetch('/admin/reassign_teacher', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                exam_date: dateVal,
+                exam_time: timeVal,
+                room_id: roomId,
+                faculty_id: facultyId,
+                force_swap: forceSwap
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'conflict') {
+                if(confirm(data.message)) {
+                    submitReassign(true); 
+                }
+            } else if(data.status === 'success') {
+                location.reload(); 
+            } else {
+                alert("Error: " + data.error);
+            }
+        });
+    }
+</script>
+{% endif %}
+
+<script>
+    function printSeating(withInvigilator) {
+        if (!withInvigilator) {
+            // Invigilator വേണ്ടെങ്കിൽ body-ലേക്ക് ക്ലാസ് ചേർക്കുന്നു
+            document.body.classList.add('hide-invigilator');
+        } else {
+            // Invigilator വേണമെങ്കിൽ ക്ലാസ് ഒഴിവാക്കുന്നു
+            document.body.classList.remove('hide-invigilator');
+        }
+        
+        // പ്രിന്റ് ഡയലോഗ് ഓപ്പൺ ചെയ്യുന്നു
+        window.print();
+        
+        // പ്രിന്റ് ക്യാൻസൽ ചെയ്താലും ആ ക്ലാസ് കളയാൻ
+        setTimeout(() => {
+            document.body.classList.remove('hide-invigilator');
+        }, 1000);
+    }
+</script>
+
+{% endblock %}

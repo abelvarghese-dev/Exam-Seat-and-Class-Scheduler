@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    :root {
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+        --slate-900: #0f172a;
+        --blue-600: #2563eb;
+    }
+
+    .about-wrapper {
+        font-family: 'Inter', sans-serif;
+        color: var(--slate-900);
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    /* HEADER - Image with Text Overlay */
+    .about-header {
+        position: relative;
+        width: 100%;
+        height: 450px;
+        border-radius: 24px;
+        overflow: hidden;
+        margin-top: -20px;
+        margin-bottom: 60px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .about-header img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .about-header-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8));
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; color: white; padding: 0 20px;
+    }
+    .about-header-overlay h1 { font-size: 3.8rem; font-weight: 800; letter-spacing: -2px; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+    .about-header-overlay p { font-size: 1.25rem; color: #cbd5e1; margin-top: 15px; max-width: 650px; line-height: 1.6; }
+
+    /* content area */
+    .content-wrapper { padding: 0 20px 80px 20px; }
+
+    /* COMMON SECTION STYLES */
+    .section-container { margin-bottom: 80px; }
+    .section-title { font-size: 2.2rem; font-weight: 800; color: var(--slate-900); margin-bottom: 15px; letter-spacing: -0.5px; text-align: center;}
+    .section-subtitle { font-size: 1.15rem; color: var(--slate-700); text-align: center; max-width: 700px; margin: 0 auto 50px auto; line-height: 1.7; }
+
+    /* SYSTEM PURPOSE (What is this?) - Modern Layout */
+    .purpose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; background: white; padding: 40px; border-radius: 20px; border: 1px solid #e2e8f0;}
+    .purpose-item { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 20px;}
+    .purpose-item li { display: flex; align-items: flex-start; gap: 15px; font-size: 1.05rem; color: var(--slate-700); line-height: 1.6;}
+    .purpose-item li i { color: #10b981; margin-top: 5px; font-size: 1.1rem; }
+
+    /* CORE FEATURES */
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+    .feature-card { padding: 20px; text-align: center; }
+    .feature-card i { font-size: 2.5rem; color: var(--blue-600); margin-bottom: 20px; display: block; }
+    .feature-card h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; }
+    .feature-card p { line-height: 1.7; color: var(--slate-700); }
+
+    /* GUIDELINES STACKED */
+    .rule-list { display: flex; flex-direction: column; gap: 20px; max-width: 850px; margin: auto; }
+    .rule-item { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; gap: 25px; align-items: center; transition: 0.3s; }
+    .rule-item:hover { border-color: var(--blue-600); transform: translateX(10px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.05); }
+    .rule-icon { font-size: 1.5rem; color: var(--blue-600); width: 40px; text-align: center; }
+    .rule-content h4 { font-size: 1.2rem; font-weight: 700; margin: 0 0 5px 0; }
+    .rule-content p { color: var(--slate-700); margin: 0; font-size: 1rem; }
+
+    /* MOTIVATIONAL SECTION */
+    .about-quotes { margin-top: 100px; display: flex; flex-direction: column; gap: 80px; }
+    .quote-block { display: flex; align-items: center; gap: 60px; }
+    .quote-block img { width: 50%; height: 380px; object-fit: cover; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+    .quote-info { width: 50%; }
+    .quote-info blockquote { font-size: 2rem; font-weight: 800; line-height: 1.3; font-style: italic; margin-bottom: 20px; color: var(--slate-900); }
+    .quote-info span { color: var(--blue-600); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
+
+    @media (max-width: 768px) {
+        .about-header { height: 300px; }
+        .about-header-overlay h1 { font-size: 2.5rem; }
+        .about-header-overlay p { font-size: 1rem; }
+        .purpose-grid { grid-template-columns: 1fr; padding: 20px;}
+        .quote-block { flex-direction: column !important; text-align: center; }
+        .quote-block img, .quote-info { width: 100%; }
+    }
+</style>
+
+<div class="about-wrapper">
+    
+    <div class="about-header">
+        <img src="https://images.pexels.com/photos/267885/pexels-photo-267885.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="University Hall">
+        <div class="about-header-overlay">
+            <h1>Exam Management Redefined</h1>
+            <p>Catholicate College brings you an intelligent ecosystem to automate and streamline examinations for a conflict-free academic experience.</p>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+
+        <div class="section-container">
+            <h2 class="section-title">What is this System?</h2>
+            <p class="section-subtitle">A digital solution engineered to eliminate manual orchestration and optimize institution resources during high-pressure examination periods.</p>
+            
+            <div class="purpose-grid">
+                <div style="text-align: justify; color: var(--slate-700); line-height: 1.8;">
+                    The Examination Orchestration System is a BCA final year project designed for Catholicate College. It replaces tedious manual exam management with an intelligent automated framework. By leveraging technology, we ensure accurate, conflict-free, and transparent operations for all stakeholders—Administrators, Faculty, and Students.
+                </div>
+                <ul class="purpose-item">
+                    <li><i class="fas fa-check-circle"></i> Eliminates scheduling conflicts between courses.</li>
+                    <li><i class="fas fa-check-circle"></i> Automates randomized seating arrangements.</li>
+                    <li><i class="fas fa-check-circle"></i> Simplifies invigilator duty assignments.</li>
+                    <li><i class="fas fa-check-circle"></i> Provides secure digital dashboards for real-time data.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section-container">
+            <h2 class="section-title">Core Capabilities</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-microchip"></i>
+                    <h3>Automated Logic</h3>
+                    <p>Advanced randomization algorithms that handle seating and scheduling without human intervention, minimizing manual errors.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-user-shield"></i>
+                    <h3>Secure Access</h3>
+                    <p>Multi-layered authentication ensuring data confidentiality and integrity for all institution stakeholders.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-sync"></i>
+                    <h3>Real-time Updates</h3>
+                    <p>Instant notifications and updates regarding timetables, hall allocations, and duties directly to your dashboard.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-container Guideline-section">
+            <h2 class="section-title">Examination Guidelines</h2>
+            <div class="rule-list">
+                <div class="rule-item">
+                    <div class="rule-icon"><i class="fas fa-id-card"></i></div>
+                    <div class="rule-content">
+                        <h4>Identity Check</h4>
+                        <p>Valid college ID and Hall Ticket are mandatory for entry into the exam zone. No documentation, no entry.</p>
+                    </div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-icon"><i class="fas fa-ban"></i></div>
+                    <div class="rule-content">
+                        <h4>Prohibited Items</h4>
+                        <p>Smartwatches, mobile phones, and any Bluetooth-enabled devices are strictly prohibited inside the hall.</p>
+                    </div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-icon"><i class="fas fa-clock"></i></div>
+                    <div class="rule-content">
+                        <h4>Punctuality</h4>
+                        <p>Candidates must report to their assigned hall at least 20 minutes before the session starts. Late entry is disallowed.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-quotes">
+            <div class="quote-block">
+                <img src="https://images.pexels.com/photos/3184328/pexels-photo-3184328.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Students Studying">
+                <div class="quote-info">
+                    <blockquote>"Education is the passport to the future, for tomorrow belongs to those who prepare for it today."</blockquote>
+                    <span>— Malcolm X</span>
+                </div>
+            </div>
+
+            <div class="quote-block" style="flex-direction: row-reverse;">
+                <img src="https://images.pexels.com/photos/3769118/pexels-photo-3769118.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Focused Student">
+                <div class="quote-info" style="text-align: right;">
+                    <blockquote>"Success is where preparation and opportunity meet."</blockquote>
+                    <span>— Bobby Unser</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

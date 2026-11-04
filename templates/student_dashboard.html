@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Premium Welcome Banner */
+    .welcome-banner {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: white; padding: 30px 40px; border-radius: 16px; margin-bottom: 40px;
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+    }
+    .btn-view-all {
+        background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 12px 24px; border-radius: 8px; font-weight: 600; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); transition: 0.3s;
+    }
+    .btn-view-all:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.02); }
+
+    /* Ultimate Ticket Card Styles */
+    .ticket-card {
+        display: flex; flex-direction: row; background: white; border-radius: 16px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; overflow: hidden;
+        margin-bottom: 30px; transition: transform 0.3s; position: relative;
+    }
+    .ticket-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+    
+    .ticket-left { flex: 1; padding: 30px; position: relative; }
+    
+    /* Highlighted Right Section */
+    .ticket-right {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white; padding: 30px; min-width: 250px; display: flex; flex-direction: column;
+        justify-content: center; align-items: center; text-align: center;
+        border-left: 2px dashed rgba(255,255,255,0.4); position: relative;
+    }
+    
+    /* Cutout Effect */
+    .ticket-right::before, .ticket-right::after {
+        content: ''; position: absolute; left: -15px; width: 30px; height: 30px;
+        background: #f8fafc; border-radius: 50%;
+    }
+    .ticket-right::before { top: -15px; }
+    .ticket-right::after { bottom: -15px; }
+
+    /* Expired Ticket */
+    .ticket-card.expired { filter: grayscale(100%); opacity: 0.8; }
+    .ticket-card.expired .ticket-right { background: linear-gradient(135deg, #64748b, #475569); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .ticket-card { flex-direction: column; }
+        .ticket-right { border-left: none; border-top: 2px dashed rgba(255,255,255,0.4); }
+        .ticket-right::before { top: -15px; left: -15px; }
+        .ticket-right::after { top: -15px; left: auto; right: -15px; bottom: auto; }
+    }
+</style>
+
+<div style="max-width: 1100px; margin: auto;">
+
+    <div class="welcome-banner">
+        <div>
+            <p style="margin: 0; color: #94a3b8; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Student Dashboard</p>
+            <h2 style="margin: 0; font-size: 2.2rem; font-weight: 700;">Hello, {{ student.name }} 👋</h2>
+            <p style="margin: 5px 0 0 0; color: #cbd5e1; font-size: 1.05rem;">Reg No: <span style="font-weight:bold; color:#fef08a;">{{ student.reg_no }}</span> | Your Seating Status</p>
+        </div>
+        <a href="/published_preview" class="btn-view-all">
+            <i class="fas fa-layer-group"></i> View Full Seating Plan
+        </a>
+    </div>
+
+    {% if active_seating %}
+        <h3 style="color: #1e293b; margin-bottom: 20px; font-size: 1.4rem;"><i class="fas fa-calendar-alt" style="color:#10b981;"></i> Exam Time Table</h3>        
+        {% for s in active_seating %}
+            <div class="ticket-card">
+                <div class="ticket-left">
+                    <h2 style="margin: 0 0 5px 0; color: #0f172a; font-size: 1.8rem;">{{ s.exam_name }}</h2>
+                    <p style="margin: 0 0 25px 0; color: #3b82f6; font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">{{ s.subject_name }}</p>
+
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 20px; border-radius: 10px; flex: 1; min-width: 150px;">
+                            <p style="margin: 0; font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase;"><i class="far fa-calendar-alt"></i> Date</p>
+                            <p style="margin: 5px 0 0 0; font-weight: 800; color: #10b981; font-size: 1.2rem;">{{ s.exam_date }}</p>
+                        </div>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 20px; border-radius: 10px; flex: 1; min-width: 150px;">
+                            <p style="margin: 0; font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase;"><i class="far fa-clock"></i> Session</p>
+                            <p style="margin: 5px 0 0 0; font-weight: 800; color: #1e293b; font-size: 1.2rem;">{{ s.exam_time }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ticket-right">
+                    <div style="background: rgba(255,255,255,0.15); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 15px;">
+                        Room No: <span style="font-size: 1.2rem; margin-left: 5px;">{{ s.room_no }}</span>
+                    </div>
+                    
+                    <p style="margin: 0; font-size: 1rem; font-weight: 600; color: #bfdbfe; letter-spacing: 2px; text-transform: uppercase;">Seat Number</p>
+                    <h1 style="margin: 5px 0 15px 0; font-size: 5rem; font-weight: 900; line-height: 1; color: #fbbf24; text-shadow: 0 4px 10px rgba(0,0,0,0.3);">{{ s.seat_no }}</h1>
+                    
+                    <div style="border: 1px dashed rgba(255,255,255,0.4); padding: 10px 20px; border-radius: 8px; width: 100%; box-sizing: border-box;">
+                        <p style="margin: 0; font-size: 0.8rem; color: #bfdbfe; text-transform: uppercase; font-weight: bold;">Bench Location</p>
+                        <p style="margin: 5px 0 0 0; font-size: 1.1rem; font-weight: 800; color: white;">Bench {{ s.bench_no }} <br> <span style="font-size: 0.9rem; font-weight: normal; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; margin-top: 5px; display: inline-block;">{{ s.side }}</span></p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    {% elif last_seating %}
+        <h3 style="color: #64748b; margin-bottom: 15px; font-size: 1.3rem;"><i class="fas fa-history"></i> Previous Exam Seating</h3>
+        <p style="color: #ef4444; font-weight: bold; margin-bottom: 25px;">No new seating allotted yet. Showing your last exam details.</p>
+        
+        <div class="ticket-card expired">
+            <div class="ticket-left">
+                <span style="position: absolute; top: 15px; right: 15px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px;">EXPIRED</span>
+                <h2 style="margin: 0 0 5px 0; color: #0f172a; font-size: 1.5rem; width: 80%;">{{ last_seating.exam_name }}</h2>
+                <p style="margin: 0 0 20px 0; color: #64748b; font-weight: 700;">{{ last_seating.subject_name }}</p>
+                <p style="margin: 0; color: #475569;"><b>Date:</b> {{ last_seating.exam_date }} | <b>Session:</b> {{ last_seating.exam_time }}</p>
+            </div>
+            
+            <div class="ticket-right" style="padding: 20px; min-width: 200px;">
+                <p style="margin: 0; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Room No: {{ last_seating.room_no }}</p>
+                <h1 style="margin: 5px 0; font-size: 3rem; font-weight: 900;">{{ last_seating.seat_no }}</h1>
+                <p style="margin: 0; font-size: 0.9rem;">Bench {{ last_seating.bench_no }} ({{ last_seating.side }})</p>
+            </div>
+        </div>
+
+    {% else %}
+        <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 2px dashed #cbd5e1;">
+            <div style="background: #f1f5f9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                <i class="fas fa-ticket-alt" style="font-size: 2.5rem; color: #94a3b8;"></i>
+            </div>
+            <h3 style="color: #334155; margin: 0 0 10px 0; font-size: 1.5rem;">No Seating Information Available</h3>
+            <p style="color: #64748b; margin: 0; font-size: 1.1rem;">Your exam seating has not been generated or published yet.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

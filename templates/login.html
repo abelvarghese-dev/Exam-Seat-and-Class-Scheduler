@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* നാവിഗേഷൻ ബാറും ഫൂട്ടറും ഹൈഡ് ചെയ്യുന്നു */
+    .navbar, .custom-footer { display: none !important; }
+    body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
+    .main-content, .container { padding: 0 !important; max-width: 100% !important; margin: 0 !important; height: 100vh; display: block; }
+
+    /* Balanced Exam Vibe Background */
+    .login-wrapper {
+        background: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.75)), 
+                    url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Larger Glassmorphism Card */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 28px;
+        padding: 55px 50px; /* വലിപ്പം കൂട്ടി */
+        width: 100%;
+        max-width: 460px; /* വീതി കൂട്ടി */
+        box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255,255,255,0.05);
+        color: #F8FAFC;
+        text-align: center;
+        animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInScale {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .logo-container i { font-size: 3rem; color: #3B82F6; margin-bottom: 15px; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.6)); }
+    .glass-card h2 { margin: 0 0 8px; font-weight: 800; font-size: 2rem; letter-spacing: 0.5px; }
+    .glass-card p { margin: 0 0 35px; font-size: 1rem; color: #CBD5E1; }
+
+    /* Perfect Seamless Sliding Role Selector */
+    .role-selector {
+        position: relative;
+        display: flex;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 50px;
+        padding: 5px;
+        margin-bottom: 35px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .role-btn {
+        flex: 1; padding: 14px 0; font-weight: 600; font-size: 0.95rem;
+        color: #94A3B8; cursor: pointer; text-align: center;
+        position: relative; z-index: 2; transition: color 0.3s ease; user-select: none;
+        border-radius: 50px;
+    }
+
+    .role-btn.active { color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+    .slider {
+        position: absolute; top: 5px; bottom: 5px; left: 5px;
+        width: calc((100% - 10px) / 3); /* കൃത്യമായി 3ൽ ഒരു ഭാഗം */
+        background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        border-radius: 50px; z-index: 1; 
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5);
+    }
+
+    /* Input Fields */
+    .input-group { position: relative; margin-bottom: 22px; text-align: left; }
+    .input-group i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 1.1rem; transition: 0.3s; }
+    
+    .glass-input {
+        width: 100%; padding: 18px 18px 18px 55px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px; color: white; font-size: 1.05rem;
+        box-sizing: border-box; transition: all 0.3s ease; outline: none;
+    }
+    
+    .glass-input::placeholder { color: #94A3B8; }
+    .glass-input:focus { border-color: #3B82F6; background: rgba(0, 0, 0, 0.4); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+    .glass-input:focus + i { color: #3B82F6; }
+
+    /* Login Button */
+    .login-submit {
+        width: 100%; padding: 18px; border: none; border-radius: 16px;
+        background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        color: white; font-size: 1.15rem; font-weight: 700; cursor: pointer;
+        transition: all 0.3s ease; margin-top: 10px;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+    }
+    .login-submit:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5); background: linear-gradient(135deg, #2563EB, #1E40AF); }
+    .login-submit:active { transform: translateY(1px); }
+
+    .error-msg { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #FCA5A5; padding: 15px; border-radius: 12px; font-size: 0.95rem; margin-bottom: 25px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; }
+    
+    /* Register Link */
+    .register-container { margin-top: 30px; font-size: 1rem; color: #CBD5E1; transition: 0.3s; }
+    .register-link { color: #60A5FA; text-decoration: none; font-weight: 700; margin-left: 5px; transition: 0.3s; }
+    .register-link:hover { color: #93C5FD; text-decoration: underline; }
+</style>
+
+<div class="login-wrapper">
+    <div class="glass-card">
+        
+        <div class="logo-container">
+            <i class="fas fa-edit"></i>
+        </div>
+        <h2>Welcome Back</h2>
+        <p>Secure login to Exam Management System</p>
+
+        {% if msg %}
+            <div class="error-msg"><i class="fas fa-exclamation-triangle"></i> {{ msg }}</div>
+        {% endif %}
+
+        <form method="POST" action="/login" onsubmit="return validateMyForm(event)">
+            
+            <input type="hidden" name="role" id="selectedRole" value="student">
+
+            <div class="role-selector">
+                <div class="slider" id="roleSlider"></div>
+                <div class="role-btn" onclick="selectRole('admin', 0)" id="btn-admin">Admin</div>
+                <div class="role-btn" onclick="selectRole('faculty', 1)" id="btn-faculty">Faculty</div>
+                <div class="role-btn active" onclick="selectRole('student', 2)" id="btn-student">Student</div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="username" class="glass-input" placeholder="User ID / Email" required autocomplete="off">
+                <i class="fas fa-user"></i>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" class="glass-input" placeholder="Password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+
+            <button type="submit" class="login-submit">
+                Sign In <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </form>
+
+        <div class="register-container" id="registerDiv">
+            New to the system? <a href="/register_student" id="regLink" class="register-link">Create an account</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function selectRole(role, index) {
+        // Update hidden input
+        document.getElementById('selectedRole').value = role;
+        
+        // Move slider perfectly (index * 100% moves it exactly to the next slot)
+        const slider = document.getElementById('roleSlider');
+        slider.style.transform = `translateX(${index * 100}%)`;
+
+        // Update active class colors
+        document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-${role}`).classList.add('active');
+
+        // Update Dynamic Register Link based on Role
+        const regDiv = document.getElementById('registerDiv');
+        const regLink = document.getElementById('regLink');
+        
+        if(role === 'admin') {
+            regDiv.style.opacity = '0';
+            setTimeout(() => regDiv.style.display = 'none', 300);
+        } else if (role === 'faculty') {
+            regDiv.style.display = 'block';
+            setTimeout(() => regDiv.style.opacity = '1', 10);
+            regLink.href = "/register_faculty"; 
+        } else if (role === 'student') {
+            regDiv.style.display = 'block';
+            setTimeout(() => regDiv.style.opacity = '1', 10);
+            regLink.href = "/register_student"; 
+        }
+    }
+
+    window.onload = function() {
+        selectRole('student', 2);
+    };
+</script>
+{% endblock %}

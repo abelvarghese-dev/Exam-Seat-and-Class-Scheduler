@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .navbar, .custom-footer { display: none !important; }
+    body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; } 
+    .main-content, .container { padding: 0 !important; max-width: 100% !important; margin: 0 !important; height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+    .reg-wrapper {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), 
+                    url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop') center/cover no-repeat;
+        height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 20px 40px;
+        width: 90%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); color: white; text-align: center;
+    }
+
+    .logo-container i { font-size: 2rem; color: #3B82F6; margin-bottom: 5px; }
+    .glass-card h2 { margin: 0 0 5px; font-weight: 800; font-size: 1.5rem; }
+    .glass-card p { margin: 0 0 15px; font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+
+    .input-group { position: relative; margin-bottom: 10px; text-align: left; }
+    .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.5); font-size: 0.9rem; pointer-events: none; }
+    
+    .glass-input {
+        width: 100%; padding: 10px 10px 10px 45px; background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: white; font-size: 0.85rem;
+        box-sizing: border-box; outline: none; transition: 0.2s; appearance: none;
+    }
+    .glass-input:focus { border-color: #3B82F6; background: rgba(0, 0, 0, 0.5); }
+
+    select.glass-input { cursor: pointer; }
+    select.glass-input option { background-color: #1e293b; color: white; }
+
+    .reg-submit {
+        width: 100%; padding: 12px; border: none; border-radius: 10px;
+        background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        color: white; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 5px;
+    }
+    .reg-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3); }
+    .back-link { display: inline-block; margin-top: 10px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.8rem; }
+</style>
+
+<div class="reg-wrapper">
+    <div class="glass-card">
+        <div class="logo-container"><i class="fas fa-chalkboard-teacher"></i></div>
+        <h2>Faculty Join</h2>
+        <p>Register to the portal</p>
+
+        <form id="facultyRegForm" method="POST" action="/register_faculty">
+            <div class="input-group">
+                <input type="text" name="name" class="glass-input" placeholder="Full Name" required autocomplete="off">
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <div class="input-group" style="flex: 1;">
+                    <input type="text" name="staff_id" class="glass-input" placeholder="Staff ID" required autocomplete="off">
+                    <i class="fas fa-id-badge"></i>
+                </div>
+                
+                <div class="input-group" style="flex: 1;">
+                    <select name="position" class="glass-input" required>
+                        <option value="" disabled selected>Position</option>
+                        <option value="HOD">HOD</option>
+                        <option value="Professor">Professor</option>
+                        <option value="Associate Professor">Associate Professor</option>
+                        <option value="Assistant Professor">Assistant Professor</option>
+                        <option value="Guest Lecturer">Guest Lecturer</option>
+                    </select>
+                    <i class="fas fa-briefcase"></i>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="email" id="email" class="glass-input" placeholder="Email Address" required autocomplete="off">
+                <i class="fas fa-envelope"></i>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="mobile" id="mobile" class="glass-input" placeholder="Mobile Number" required autocomplete="off" maxlength="10">
+                <i class="fas fa-phone"></i>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <div class="input-group" style="flex: 1;">
+                    <input type="password" name="password" id="password" class="glass-input" placeholder="Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <input type="password" name="confirm_password" id="confirm_password" class="glass-input" placeholder="Confirm" required>
+                    <i class="fas fa-check-double"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="reg-submit">Register Now</button>
+        </form>
+        <a href="/login" class="back-link"><i class="fas fa-arrow-left"></i> Back to Login</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('facultyRegForm').onsubmit = function(e) {
+        e.preventDefault();
+        
+        // 1. Email Format Check (NEW)
+        const email = document.getElementById('email').value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Swal.fire({ icon: 'error', title: 'Invalid Email', text: 'Please enter a valid email address (e.g., yourname@gmail.com)!', background: '#1e293b', color: '#fff' });
+            return;
+        }
+
+        // 2. Mobile Number Check (10 Digits exactly)
+        const mobile = document.getElementById('mobile').value;
+        if (!/^[0-9]{10}$/.test(mobile)) {
+            Swal.fire({ icon: 'error', title: 'Invalid Mobile', text: 'Mobile number must be exactly 10 digits!', background: '#1e293b', color: '#fff' });
+            return;
+        }
+
+        // 3. Password Strength Check 
+        const pass = document.getElementById('password').value;
+        const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{6,}$/;
+        if (!passRegex.test(pass)) {
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Weak Password', 
+                html: 'Password must contain at least:<br>• 6 characters<br>• 1 Uppercase letter<br>• 1 Number<br>• 1 Special Symbol', 
+                background: '#1e293b', color: '#fff' 
+            });
+            return;
+        }
+
+        // 4. Confirm Password Match Check
+        const confirmPass = document.getElementById('confirm_password').value;
+        if(pass !== confirmPass) {
+            Swal.fire({ icon: 'error', title: 'Mismatch', text: 'Passwords do not match!', background: '#1e293b', color: '#fff' });
+            return;
+        }
+
+        // 5. Data sending to Backend (app.py)
+        fetch(this.action, { method: 'POST', body: new FormData(this) })
+        .then(response => response.json()) 
+        .then(data => {
+            if (data.status === "success") {
+                Swal.fire({
+                    title: 'Registration Sent!',
+                    text: 'Wait for Admin Approval to access your account.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3B82F6',
+                    background: '#1e293b',
+                    color: '#fff'
+                }).then(() => {
+                    window.location.href = "/login";
+                });
+            } else {
+                // പൈത്തണിൽ നിന്നുള്ള Duplicate Email/Mobile/Staff ID എറർ ഇവിടെ കാണിക്കും
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Registration Failed', 
+                    text: data.message, 
+                    background: '#1e293b', color: '#fff' 
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Network Error! Please try again.', background: '#1e293b', color: '#fff' });
+        });
+    };
+
+    // മൊബൈൽ നമ്പറിൽ അക്ഷരങ്ങൾ ടൈപ്പ് ചെയ്യാൻ പറ്റാതിരിക്കാൻ
+    document.getElementById('mobile').addEventListener('input', function (e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+</script>
+{% endblock %}

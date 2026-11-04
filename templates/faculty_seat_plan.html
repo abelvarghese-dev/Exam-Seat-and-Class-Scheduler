@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Premium Duty Card Styles */
+    .duty-card {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    .duty-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: #cbd5e1;
+    }
+    .card-header-accent {
+        height: 6px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        width: 100%;
+    }
+    
+    /* Welcome Banner Styles */
+    .welcome-banner {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 16px;
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+    }
+    .btn-view-all {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+        transition: 0.3s;
+    }
+    .btn-view-all:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(1.02);
+    }
+</style>
+
+<div style="max-width: 1100px; margin: auto;">
+    
+    <div class="welcome-banner">
+        <div>
+            <p style="margin: 0; color: #94a3b8; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Faculty Dashboard</p>
+            <h2 style="margin: 0; font-size: 2.2rem; font-weight: 700;">Hello, {{ teacher_name }} 👋</h2>
+            <p style="margin: 5px 0 0 0; color: #cbd5e1; font-size: 1.05rem;">Here are your assigned invigilation duties.</p>
+        </div>
+        <a href="/published_preview" class="btn-view-all">
+            <i class="fas fa-layer-group"></i> View All Seating Arrangements
+        </a>
+    </div>
+
+    {% if not duties %}
+        <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 2px dashed #cbd5e1;">
+            <div style="background: #f1f5f9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                <i class="fas fa-coffee" style="font-size: 2.5rem; color: #94a3b8;"></i>
+            </div>
+            <h3 style="color: #334155; margin: 0 0 10px 0; font-size: 1.5rem;">No Upcoming Duties</h3>
+            <p style="color: #64748b; margin: 0; font-size: 1.1rem;">You currently have no invigilation duties assigned to you.</p>
+        </div>
+    {% else %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px;">
+        {% for duty in duties %}
+            <div class="duty-card">
+                <div class="card-header-accent"></div>
+                
+                <div style="padding: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+                        <div>
+                            <div style="display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                                Allotted Room
+                            </div>
+                            <h2 style="margin: 0; color: #0f172a; font-size: 2.8rem; line-height: 1;">{{ duty.room_no }}</h2>
+                        </div>
+                        
+                        <div style="text-align: center; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; padding: 12px 20px;">
+                            <h3 style="margin: 0; font-size: 1.8rem; color: #dc2626; line-height: 1;">{{ duty.student_count }}</h3>
+                            <p style="margin: 5px 0 0 0; font-size: 0.75rem; font-weight: 700; color: #991b1b; text-transform: uppercase;">Students</p>
+                        </div>
+                    </div>
+
+                    <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 0 0 20px 0;">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.2rem;">
+                                <i class="far fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Date</p>
+                                <p style="margin: 0; font-weight: 700; color: #1e293b; font-size: 1.05rem;">{{ duty.exam_date }}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.2rem;">
+                                <i class="far fa-clock"></i>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Session</p>
+                                <p style="margin: 0; font-weight: 700; color: #1e293b; font-size: 1.05rem;">
+                                    {{ duty.exam_time }}
+                                    <span style="font-size: 0.8rem; color: #94a3b8; font-weight: normal;">
+                                        ({{ 'Forenoon' if duty.exam_time == 'FN' else 'Afternoon' }})
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .setup-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    .dept-block { background: #f1f5f9; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #cbd5e1; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .subject-row { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: grid; grid-template-columns: 2fr 1.5fr 1fr auto; gap: 10px; align-items: end; border: 1px solid #e2e8f0; }
+    .btn-add-dept { background: #8b5cf6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+    .btn-add-sub { background: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+    .btn-publish { background: #10b981; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-size: 1.1rem; font-weight: 800; cursor: pointer; margin-top: 20px; }
+    .remove-btn { color: #ef4444; cursor: pointer; background: none; border: none; font-size: 1.1rem; }
+</style>
+
+<div class="page-header" style="margin-bottom: 25px;">
+    <h2>🚀 Create Multi-Dept Exam Schedule</h2>
+</div>
+
+<div class="setup-card">
+    <form method="POST" action="/admin/timetable">
+        <div style="margin-bottom: 25px;">
+            <label style="font-weight: 700; display: block; margin-bottom: 8px;">Exam Name / Title</label>
+            <input type="text" name="exam_name" class="form-control" placeholder="e.g. First Internal 2026" required style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;">
+        </div>
+
+        <div id="dept_container">
+            <div class="dept-block">
+                <div class="section-title">
+                    <i class="fas fa-university text-purple"></i> 
+                    
+                    <select class="course-select" required onchange="clearSubjects(this)" style="padding: 8px; border-radius: 6px;">
+                        <option value="">-- Select Department --</option>
+                        {% for c in courses %}
+                        <option value="{{ c.id }}">{{ c.course_name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select class="sem-select" required onchange="clearSubjects(this)" style="padding: 8px; border-radius: 6px; background: #f8fafc;">
+                        <option value="">-- Select Semester --</option>
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Semester 6</option>
+                        <option value="7">Semester 7</option>
+                        <option value="8">Semester 8</option>
+                    </select>
+
+                    <button type="button" class="remove-btn" onclick="removeDeptBlock(this)" style="margin-left: auto;"><i class="fas fa-trash"></i></button>
+                </div>
+                
+                <div class="subjects-list"></div>
+                
+                <button type="button" class="btn-add-sub" onclick="addSubjectRow(this)">+ Add Subject</button>
+            </div>
+        </div>
+
+        <button type="button" class="btn-add-dept" onclick="addDeptBlock()">+ Add Another Department</button>
+        <button type="submit" name="save_timetable" class="btn-publish"><i class="fas fa-check-circle"></i> Save & Publish All</button>
+    </form>
+</div>
+
+<template id="subject_template">
+    <div class="subject-row">
+        <input type="hidden" name="row_course_id[]" class="hidden-course">
+        <input type="hidden" name="row_semester[]" class="hidden-sem">
+        
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600;">Subject</label>
+            <select name="subject[]" class="subject-dropdown" required style="width: 100%; padding: 8px; border-radius: 6px;">
+                <option value="">-- Select --</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600;">Date</label>
+            <input type="date" name="date[]" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+        </div>
+        <div>
+            <label style="font-size: 0.8rem; font-weight: 600;">Session</label>
+            <select name="time[]" style="width: 100%; padding: 8px; border-radius: 6px;">
+                <option value="FN">FN</option>
+                <option value="AN">AN</option>
+            </select>
+        </div>
+        
+        <button type="button" class="remove-btn" onclick="removeSubjectRow(this)"><i class="fas fa-times"></i></button>
+    </div>
+</template>
+
+<script>
+    function addDeptBlock() {
+        const container = document.getElementById('dept_container');
+        const firstBlock = document.querySelector('.dept-block');
+        const newBlock = firstBlock.cloneNode(true);
+        
+        newBlock.querySelector('.subjects-list').innerHTML = ''; 
+        newBlock.querySelector('.course-select').selectedIndex = 0;
+        newBlock.querySelector('.sem-select').selectedIndex = 0;
+        
+        container.appendChild(newBlock);
+    }
+
+    // 🛑 1. DEPARTMENT BLOCK DELETE LOGIC 🛑
+    function removeDeptBlock(btn) {
+        const container = document.getElementById('dept_container');
+        const blocks = container.querySelectorAll('.dept-block');
+        const blockToRemove = btn.closest('.dept-block');
+
+        if (blocks.length > 1) {
+            // Onnil kooduthal undenkil delete cheyyunnu
+            blockToRemove.remove(); 
+        } else {
+            // Avasanathethu aayal clear mathram cheyyunnu
+            blockToRemove.querySelector('.course-select').selectedIndex = 0;
+            blockToRemove.querySelector('.sem-select').selectedIndex = 0;
+            blockToRemove.querySelector('.subjects-list').innerHTML = '';
+        }
+    }
+
+    // 🛑 2. SUBJECT ROW DELETE LOGIC 🛑
+    function removeSubjectRow(btn) {
+        const rowToRemove = btn.closest('.subject-row');
+        const subjectsList = rowToRemove.closest('.subjects-list');
+        const rows = subjectsList.querySelectorAll('.subject-row');
+
+        if (rows.length > 1) {
+            // Onnil kooduthal subjects undenkil delete cheyyunnu
+            rowToRemove.remove();
+        } else {
+            // Avasanathe subject aayal ulla values clear cheyyunnu
+            rowToRemove.querySelector('.subject-dropdown').selectedIndex = 0;
+            rowToRemove.querySelector('input[type="date"]').value = '';
+            rowToRemove.querySelector('select[name="time[]"]').selectedIndex = 0;
+        }
+    }
+
+    function clearSubjects(select) {
+        const deptBlock = select.closest('.dept-block');
+        deptBlock.querySelector('.subjects-list').innerHTML = '';
+    }
+
+    function addSubjectRow(btn) {
+        const deptBlock = btn.closest('.dept-block');
+        const subjectsList = deptBlock.querySelector('.subjects-list');
+        const courseId = deptBlock.querySelector('.course-select').value;
+        const semester = deptBlock.querySelector('.sem-select').value;
+
+        if (!courseId || !semester) {
+            alert("Please select both Department and Semester first!");
+            return;
+        }
+
+        const template = document.getElementById('subject_template').content.cloneNode(true);
+        template.querySelector('.hidden-course').value = courseId;
+        template.querySelector('.hidden-sem').value = semester;
+        const dropdown = template.querySelector('.subject-dropdown');
+
+        fetch('/get_subjects/' + courseId)
+            .then(res => res.json())
+            .then(data => {
+                let subjectFound = false;
+                data.forEach(sub => {
+                    if(String(sub.semester) === String(semester)) {
+                        dropdown.innerHTML += `<option value="${sub.id}">${sub.subject_name}</option>`;
+                        subjectFound = true;
+                    }
+                });
+                
+                if(!subjectFound) {
+                    alert("No subjects are added in this semester!");
+                } else {
+                    subjectsList.appendChild(template);
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alert("Database error. Could not load subjects.");
+            });
+    }
+</script>
+{% endblock %}

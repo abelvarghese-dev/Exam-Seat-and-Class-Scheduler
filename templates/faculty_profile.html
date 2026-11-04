@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
+<style>
+    /* Profile Card Styling */
+    .profile-card {
+        max-width: 600px; margin: auto; background: white; 
+        padding: 40px; border-radius: 15px; 
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .img-container {
+        width: 140px; height: 140px; margin: 0 auto 20px auto;
+        border-radius: 50%; border: 4px solid #f8f9fa;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background-color: #e9ecef; overflow: hidden; display: flex; align-items: center; justify-content: center;
+    }
+
+    .profile-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .fallback-icon { font-size: 4rem; color: #adb5bd; display: none; }
+
+    /* EDIT MODE: Image Upload & Hover Style */
+    .pic-wrapper {
+        position: relative; width: 140px; height: 140px; margin: 0 auto 15px auto;
+        border-radius: 50%; border: 4px solid #e2e8f0; cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); background-color: #e9ecef; overflow: hidden;
+    }
+    .pic-wrapper img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pic-overlay {
+        position: absolute; inset: 0; background: rgba(0,0,0,0.5); 
+        display: flex; justify-content: center; align-items: center; 
+        opacity: 0; transition: 0.3s; color: white; font-size: 2rem;
+    }
+    .pic-wrapper:hover .pic-overlay { opacity: 1; }
+
+    .crop-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .crop-container { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; }
+    .crop-img-area { width: 100%; max-height: 400px; margin-bottom: 20px; }
+    .crop-img-area img { max-width: 100%; display: block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<div class="profile-card">
+    
+    {% if msg %}
+        <div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #c3e6cb; font-weight: bold;">
+            {{ msg }}
+        </div>
+    {% endif %}
+
+    <div id="view-mode">
+        <h2 style="text-align: center; color: #333; margin-bottom: 10px;">👨‍🏫 Faculty Profile</h2>
+        
+        <div style="text-align: center; margin-bottom: 25px;">
+            <span style="background: #e3f2fd; color: #0d47a1; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: 700;">
+                {{ faculty.profession if faculty.profession else 'Faculty' }}
+            </span>
+        </div>
+
+        <div class="img-container">
+            <img src="{{ url_for('static', filename='uploads/' + (faculty.photo if faculty.photo else 'default.png')) }}?v={{ range(1, 1000) | random }}" 
+                 class="profile-img" alt="Profile Photo" onerror="handleImageError(this)">
+            <span class="fallback-icon">👤</span>
+        </div>
+
+        <div style="font-size: 1.05rem; line-height: 2.2; color: #555;">
+            <div style="border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="font-weight: bold; display: block; font-size: 0.85rem; text-transform: uppercase; color: #777;">Full Name</span>
+                <span style="color: #000; font-weight: 600;">{{ faculty.name }}</span>
+            </div>
+            
+            <div style="border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="font-weight: bold; display: block; font-size: 0.85rem; text-transform: uppercase; color: #777;">User ID (Login ID)</span>
+                <span style="font-family: monospace; font-size: 1.05rem; color: #d63384; font-weight: bold;">{{ faculty.username }}</span>
+            </div>
+            
+            <div style="border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="font-weight: bold; display: block; font-size: 0.85rem; text-transform: uppercase; color: #777;">College Position</span>
+                <span style="color: #000; font-weight: 500;">{{ faculty.position if faculty.position else 'Not Assigned' }}</span>
+            </div>
+
+            <div style="border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="font-weight: bold; display: block; font-size: 0.85rem; text-transform: uppercase; color: #777;">Email Address</span>
+                <span style="color: #000; font-weight: 500;">{{ faculty.email if faculty.email else 'Not Added' }}</span>
+            </div>
+
+            <div style="border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="font-weight: bold; display: block; font-size: 0.85rem; text-transform: uppercase; color: #777;">Mobile Number</span>
+                <span style="color: #000; font-weight: 500;">{{ faculty.mobile }}</span>
+            </div>
+        </div>
+
+        <button onclick="toggleMode('edit')" style="margin-top: 25px; width: 100%; background: #0d6efd; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s;">
+            ✏️ Edit Profile
+        </button>
+    </div>
+
+    <div id="edit-mode" style="display: none; animation: fadeIn 0.4s ease-in-out;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #1e293b; margin: 0; font-size: 1.6rem; font-weight: 700;">Update Profile</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-top: 5px;">Manage your account information and photo</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="profileForm">
+            
+            <div style="text-align: center; margin-bottom: 35px; position: relative;">
+                <div class="pic-wrapper" onclick="document.getElementById('imageUpload').click()" 
+                    style="width: 140px; height: 140px; margin: 0 auto; border: 4px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 50%; overflow: hidden; cursor: pointer; position: relative; transition: 0.3s;">
+                    
+                    <img id="profilePreview" src="{{ url_for('static', filename='uploads/' + (faculty.photo if faculty.photo else 'default.png')) }}?v={{ range(1, 1000) | random }}" 
+                        style="width: 100%; height: 100%; object-fit: cover;"
+                        onerror="this.src='https://ui-avatars.com/api/?name={{ faculty.name | default('User') | replace(' ', '+') }}&background=e2e8f0&color=475569'">
+                    
+                    <div class="pic-overlay" style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; color: white;">
+                        <i class="fas fa-camera" style="font-size: 1.5rem; margin-bottom: 5px;"></i>
+                        <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Change</span>
+                    </div>
+                </div>
+                
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                <input type="hidden" name="current_photo" value="{{ faculty.photo }}">
+                <input type="hidden" name="cropped_image" id="croppedImageInput">
+                <input type="hidden" name="password" value="{{ faculty.password }}">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">Full Name</label>
+                        <input type="text" class="form-control" value="{{ faculty.name }}" readonly 
+                            style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #94a3b8; font-weight: 500; box-sizing: border-box;">
+                        <input type="hidden" name="name" value="{{ faculty.name }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">Staff ID</label>
+                        <input type="text" class="form-control" value="{{ faculty.username }}" readonly 
+                            style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #94a3b8; font-weight: 500; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">Position / Role</label>
+                    <div style="position: relative;">
+                        <select name="position" class="form-control" required 
+                                style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 0.95rem; font-weight: 500; appearance: none; cursor: pointer; box-sizing: border-box;">
+                            <option value="HOD" {% if faculty.position == 'HOD' %}selected{% endif %}>HOD</option>
+                            <option value="Professor" {% if faculty.position == 'Professor' %}selected{% endif %}>Professor</option>
+                            <option value="Assistant Professor" {% if faculty.position == 'Assistant Professor' %}selected{% endif %}>Assistant Professor</option>
+                            <option value="Guest Lecturer" {% if faculty.position == 'Guest Lecturer' %}selected{% endif %}>Guest Lecturer</option>
+                            <option value="Lab Assistant" {% if faculty.position == 'Lab Assistant' %}selected{% endif %}>Lab Assistant</option>
+                        </select>
+                        <i class="fas fa-chevron-down" style="position: absolute; right: 15px; top: 18px; color: #64748b; font-size: 0.8rem; pointer-events: none;"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">Email Address</label>
+                    <input type="email" name="email" class="form-control" value="{{ faculty.email }}" required 
+                        style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 0.95rem; transition: 0.3s; box-sizing: border-box;">
+                </div>
+
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">Mobile Number</label>
+                    <input type="text" name="mobile" class="form-control" value="{{ faculty.mobile }}" required 
+                        style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 0.95rem; transition: 0.3s; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 40px;">
+                <button type="button" onclick="toggleMode('view')" 
+                        style="flex: 1; padding: 14px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #fff; color: #475569; font-weight: 700; cursor: pointer; transition: 0.3s;">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        style="flex: 1; padding: 14px; border-radius: 12px; border: none; background: #10b981; color: white; font-weight: 700; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="crop-modal" id="cropModal">
+    <div class="crop-container">
+        <h3 style="margin-top:0; color: #333; text-align: center;">Crop Profile Photo</h3>
+        <div class="crop-img-area">
+            <img id="imageToCrop" src="">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button type="button" onclick="closeCropModal()" style="flex: 1; padding: 10px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight:bold;">Cancel</button>
+            <button type="button" id="cropBtn" style="flex: 1; padding: 10px; background: #0d6efd; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight:bold;">Crop & Set</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+    // 🛑 പേജ് ലോഡ് ആകുമ്പോൾ URL ചെക്ക് ചെയ്യാനുള്ള ലോജിക്
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('mode') === 'edit') {
+            toggleMode('edit'); 
+        }
+    };
+
+    function toggleMode(mode) {
+        var view = document.getElementById('view-mode');
+        var edit = document.getElementById('edit-mode');
+        if (mode === 'edit') {
+            view.style.display = 'none';
+            edit.style.display = 'block';
+        } else {
+            edit.style.display = 'none';
+            view.style.display = 'block';
+        }
+    }
+
+    function handleImageError(img) {
+        img.style.display = 'none';
+        img.parentElement.querySelector('.fallback-icon').style.display = 'block';
+    }
+
+    // --- CROPPER LOGIC ---
+    let cropper;
+    const imageUpload = document.getElementById('imageUpload');
+    const imageToCrop = document.getElementById('imageToCrop');
+    const cropModal = document.getElementById('cropModal');
+    const profilePreview = document.getElementById('profilePreview');
+    const croppedImageInput = document.getElementById('croppedImageInput');
+
+    imageUpload.addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imageToCrop.src = event.target.result;
+                cropModal.style.display = 'flex';
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 1, 
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    // വട്ടത്തിലുള്ള ഷേഡ് വരാൻ വേണ്ടി നേരത്തെ കൊടുത്ത CSS ഇവിടെയും പ്രവർത്തിക്കും
+                });
+            };
+            reader.readAsDataURL(files[0]);
+        }
+    });
+
+    document.getElementById('cropBtn').addEventListener('click', function() {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+        const base64Image = canvas.toDataURL('image/jpeg');
+        
+        profilePreview.src = base64Image;
+        profilePreview.style.display = 'block';
+        const fallback = profilePreview.parentElement.querySelector('.fallback-icon');
+        if(fallback) fallback.style.display = 'none';
+
+        croppedImageInput.value = base64Image;
+        closeCropModal();
+    });
+
+    function closeCropModal() {
+        cropModal.style.display = 'none';
+        imageUpload.value = ''; 
+    }
+</script>
+{% endblock %}

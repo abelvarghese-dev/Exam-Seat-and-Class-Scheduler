@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>🎓 My Exam Schedule & Ticket</h1>
+    
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>🗓️ Upcoming Exams</h3>
+            <button onclick="window.print()" style="width: auto; padding: 10px 20px;">Download/Print</button>
+        </div>
+        
+        <table>
+            <thead>
+                <tr style="background: #333; color: white;">
+                    <th>Date</th><th>Time</th><th>Subject</th><th>Room</th><th>Seat No</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in schedule %}
+                <tr>
+                    <td>{{ s.exam_date }}</td>
+                    <td>{{ s.exam_time }}</td>
+                    <td>{{ s.subject_name }}</td>
+                    <td style="color: var(--primary-color); font-weight: bold;">{{ s.room_no }}</td>
+                    <td style="font-size: 1.2em; font-weight: bold;">{{ s.seat_no }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" style="text-align: center;">Schedule not generated yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

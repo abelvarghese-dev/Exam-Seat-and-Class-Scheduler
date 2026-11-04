@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .add-card {
+        background: var(--card-bg); padding: 30px 40px; border-radius: 12px;
+        border: 1px solid var(--border-light); box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        max-width: 600px; margin: 40px auto;
+    }
+    .add-header {
+        display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border-light);
+        padding-bottom: 15px; margin-bottom: 25px;
+    }
+    .add-header h2 { margin: 0; color: #10B981; }
+    
+    .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
+    .form-group label { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+    .form-group input, .form-group select {
+        padding: 12px; border: 1px solid var(--border-light); border-radius: 8px;
+        background: var(--page-bg); color: var(--text-primary); font-size: 1rem;
+        font-family: 'Inter', sans-serif; transition: 0.3s;
+    }
+    .form-group input:focus, .form-group select:focus {
+        border-color: #10B981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); outline: none;
+    }
+    
+    .btn-container { display: flex; gap: 15px; margin-top: 20px; }
+    .btn-save {
+        background: #10B981; color: white; padding: 12px 25px; border-radius: 8px;
+        font-size: 1rem; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; flex: 1;
+    }
+    .btn-save:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+    
+    .btn-cancel {
+        background: var(--page-bg); color: var(--text-primary); padding: 12px 25px; border-radius: 8px;
+        font-size: 1rem; font-weight: bold; text-decoration: none; text-align: center; border: 1px solid var(--border-light); transition: 0.3s; flex: 1;
+    }
+    .btn-cancel:hover { background: #E2E8F0; }
+    
+    .bottom-link {
+        text-align: center; margin-top: 25px; padding-top: 20px;
+        border-top: 1px solid var(--border-light); font-size: 0.95rem; color: var(--text-secondary);
+    }
+    .bottom-link a {
+        color: #8B5CF6; font-weight: 700; text-decoration: none; margin-left: 5px; transition: 0.3s;
+    }
+    .bottom-link a:hover { color: #7C3AED; text-decoration: underline; }
+</style>
+
+<div class="add-card">
+    <div class="add-header">
+        <i class="fas fa-book-medical" style="font-size: 2rem; color: #10B981;"></i>
+        <h2>Add New Subject</h2>
+    </div>
+
+    <form method="POST" action="/add_subject">
+        <input type="hidden" name="next_url" value="{{ next_url }}">
+        
+        <div class="form-group">
+            <label>Subject Name</label>
+            <input type="text" name="subject_name" placeholder="e.g. Operating Systems" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Subject Code</label>
+            <input type="text" name="subject_code" placeholder="e.g. CS401" required>
+        </div>
+
+        <div class="form-group">
+            <label>Department / Course</label>
+            <select name="course_id" required>
+                <option value="">-- Select Course --</option>
+                {% for c in courses %}
+                    <option value="{{ c.id }}">{{ c.course_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Semester</label>
+            <select name="semester" required>
+                <option value="">-- Select Semester --</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+            </select>
+        </div>
+
+        <div class="btn-container">
+            <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Subject</button>
+            <a href="{{ next_url if next_url else '/manage/subjects' }}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+
+    <div class="bottom-link">
+        Department not found in the list? <a href="/add_department">Add New Department</a>
+    </div>
+</div>
+{% endblock %}

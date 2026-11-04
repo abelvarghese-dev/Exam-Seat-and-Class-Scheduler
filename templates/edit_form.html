@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+    <div style="max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+        <h2>✏️ Edit {{ type }} Details</h2>
+        
+        <form action="{{ action }}" method="post">
+            
+            {% if type == 'Subject' %}
+                <label>Subject Name</label>
+                <input type="text" name="subject_name" value="{{ data.subject_name }}">
+                <label>Semester</label>
+                <input type="number" name="semester" value="{{ data.semester }}">
+
+            {% elif type == 'Room' %}
+                <label>Room Number</label>
+                <input type="text" name="room_no" value="{{ data.room_no }}">
+                <label>Capacity</label>
+                <input type="number" name="capacity" value="{{ data.capacity }}">
+            
+            {% else %}
+                <label>Name</label>
+                <input type="text" name="name" value="{{ data.name }}">
+                <label>Mobile</label>
+                <input type="text" name="mobile" value="{{ data.mobile }}">
+                
+                {% if type == 'Student' %}
+                    <label>Register No</label>
+                    <input type="text" name="reg_no" value="{{ data.reg_no }}">
+                {% endif %}
+
+                {% if type == 'Faculty' %}
+                    <label>Position</label>
+                    <select name="position">
+                        <option value="Teacher" {% if data.position == 'Teacher' %}selected{% endif %}>Teacher</option>
+                        <option value="HOD" {% if data.position == 'HOD' %}selected{% endif %}>HOD</option>
+                    </select>
+                {% endif %}
+            {% endif %}
+
+            <br><br>
+            <button type="submit" style="width:100%">Update Changes</button>
+            <br><br>
+            <center><a href="javascript:history.back()">Cancel</a></center>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+<style>
+    .edit-container { max-width: 500px; margin: 40px auto; background: #fff; padding: 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.9rem; }
+    .form-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; color: #1e293b; box-sizing: border-box; transition: 0.3s; }
+    .form-group input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .btn-save { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 1.05rem; cursor: pointer; width: 100%; margin-top: 15px; box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2); transition: 0.3s; }
+    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3); }
+
+    /* --- Crop Modal CSS --- */
+    .crop-modal-overlay { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.7); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .crop-modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+    /* സർക്കിൾ ഗൈഡ് വരാൻ */
+    .cropper-view-box, .cropper-face { border-radius: 50%; } 
+    .crop-btns { margin-top: 20px; display: flex; gap: 15px; }
+    .crop-btns button { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.3s; }
+    .btn-cancel { background: #f1f5f9; color: #475569; }
+    .btn-cancel:hover { background: #e2e8f0; }
+    .btn-crop-done { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2); }
+    .btn-crop-done:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3); }
+</style>
+
+<div class="edit-container">
+    <h2 style="color: #0f172a; margin-top: 0; margin-bottom: 30px; text-align: center;">
+        <i class="fas fa-user-edit" style="color: #3b82f6; margin-right: 8px;"></i> Edit Profile
+    </h2>
+
+    <form action="/admin/update_profile" method="POST" enctype="multipart/form-data">
+        
+        <input type="hidden" name="cropped_data" id="cropped_data">
+        
+        <div style="position: relative; width: 130px; height: 130px; margin: 0 auto 30px;">
+            <img src="/static/uploads/{{ user['photo'] if user and user['photo'] else 'default.png' }}" onerror="this.src='https://ui-avatars.com/api/?name={{ user['name'] | default('Admin') | replace(' ', '+') }}&background=3B82F6&color=fff'" id="editPreview" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid #e2e8f0;">
+            <label for="dp_edit_upload" style="position: absolute; bottom: 0; right: 0; background: #3b82f6; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <i class="fas fa-camera"></i>
+            </label>
+            <input type="file" name="profile_pic" id="dp_edit_upload" accept="image/*" style="display: none;">
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-user" style="color: #94a3b8; margin-right: 5px;"></i> Name</label>
+            <input type="text" name="admin_name" value="{{ user['name'] if user else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-envelope" style="color: #94a3b8; margin-right: 5px;"></i> Official Email</label>
+            <input type="email" name="admin_email" value="{{ user['email'] if user else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-phone-alt" style="color: #94a3b8; margin-right: 5px;"></i> Contact Number</label>
+            <input type="text" name="admin_phone" value="{{ user['mobile'] if user else '' }}" required>
+        </div>
+
+        <button type="submit" class="btn-save"><i class="fas fa-save" style="margin-right: 8px;"></i> Save Changes</button>
+    </form>
+</div>
+
+<div id="cropModal" class="crop-modal-overlay">
+    <div class="crop-modal-content">
+        <h3 style="margin-top: 0; margin-bottom: 20px; color: #0f172a; font-size: 1.2rem;">Adjust Profile Picture</h3>
+        <div style="width: 100%; max-height: 300px; overflow: hidden; border-radius: 12px; background: #f8fafc;">
+            <img id="imageToCrop" style="max-width: 100%; display: block;">
+        </div>
+        <div class="crop-btns">
+            <button type="button" class="btn-cancel" onclick="closeCropModal()">Cancel</button>
+            <button type="button" class="btn-crop-done" id="btnCropDone">Done</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script>
+    let cropper;
+    const fileInput = document.getElementById('dp_edit_upload');
+    const imageToCrop = document.getElementById('imageToCrop');
+    const cropModal = document.getElementById('cropModal');
+    const editPreview = document.getElementById('editPreview');
+    const croppedDataInput = document.getElementById('cropped_data');
+
+    // ഫോട്ടോ സെലക്ട് ചെയ്യുമ്പോൾ Modal കാണിക്കുക
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imageToCrop.src = event.target.result;
+                cropModal.style.display = 'flex'; // Modal തുറക്കുന്നു
+                
+                if (cropper) { cropper.destroy(); } // പഴയത് ഉണ്ടെങ്കിൽ കളയുന്നു
+                
+                // Cropper സെറ്റ് ചെയ്യുന്നു (aspectRatio 1 കൊടുക്കുന്നത് കൊണ്ട് സർക്കിൾ ആയി വരും)
+                cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    background: false
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // 'Done' ബട്ടൺ ക്ലിക്ക് ചെയ്യുമ്പോൾ
+    document.getElementById('btnCropDone').addEventListener('click', function() {
+        if (!cropper) return;
+        
+        // ഫോട്ടോ ക്രോപ്പ് ചെയ്ത് കോഡ് ആക്കി മാറ്റുന്നു
+        const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+        const base64data = canvas.toDataURL('image/png');
+        
+        // ഹിഡൻ ഇൻപുട്ടിലേക്കും പ്രിവ്യൂവിലേക്കും കൊടുക്കുന്നു
+        croppedDataInput.value = base64data;
+        editPreview.src = base64data;
+        
+        closeCropModal();
+    });
+
+    // Modal അടയ്ക്കാൻ
+    function closeCropModal() {
+        cropModal.style.display = 'none';
+        fileInput.value = ''; 
+    }
+
+    window.onload = function() {
+        var img = document.getElementById('editPreview');
+        if(img.src.includes('.jpg') || img.src.includes('.png')) {
+            img.src = img.src + '?v=' + new Date().getTime(); // ക്യാഷ് മാറ്റാൻ
+        }
+    }
+</script>
+{% endblock %}

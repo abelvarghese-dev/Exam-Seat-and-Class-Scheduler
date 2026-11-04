@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .add-card {
+        background: var(--card-bg); padding: 30px 40px; border-radius: 12px;
+        border: 1px solid var(--border-light); box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        max-width: 500px; margin: 50px auto;
+    }
+    .add-header {
+        display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border-light);
+        padding-bottom: 15px; margin-bottom: 25px;
+    }
+    .add-header h2 { margin: 0; color: #10B981; }
+    
+    .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
+    .form-group label { font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; }
+    .form-group input {
+        padding: 12px; border: 1px solid var(--border-light); border-radius: 8px;
+        background: var(--page-bg); color: var(--text-primary); font-size: 1rem;
+        font-family: 'Inter', sans-serif; transition: 0.3s;
+    }
+    .form-group input:focus {
+        border-color: #10B981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); outline: none;
+    }
+    
+    .info-box {
+        background: #ECFDF5; border-left: 4px solid #10B981; padding: 12px 15px;
+        border-radius: 4px; color: #065F46; font-size: 0.85rem; margin-bottom: 20px;
+    }
+
+    .btn-container { display: flex; gap: 15px; }
+    .btn-save {
+        background: #10B981; color: white; padding: 12px 25px; border-radius: 8px;
+        font-size: 1rem; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; flex: 1;
+    }
+    .btn-save:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+    
+    .btn-cancel {
+        background: var(--page-bg); color: var(--text-primary); padding: 12px 25px; border-radius: 8px;
+        font-size: 1rem; font-weight: bold; text-decoration: none; text-align: center; border: 1px solid var(--border-light); transition: 0.3s; flex: 1;
+    }
+    .btn-cancel:hover { background: #E2E8F0; }
+</style>
+
+<div class="add-card">
+    <div class="add-header">
+        <i class="fas fa-door-open" style="font-size: 2rem; color: #10B981;"></i>
+        <h2>Add New Room</h2>
+    </div>
+
+    <div class="info-box">
+        <i class="fas fa-info-circle"></i> <b>Total Capacity</b> is automatically calculated based on the number of benches (1 Bench = 2 Students).
+    </div>
+
+    <form method="POST" action="/add_room">
+        <div class="form-group">
+            <label>Room Number / Hall Name</label>
+            <input type="text" name="room_no" placeholder="e.g. Hall 1, Room 101" required>
+        </div>
+
+        <div class="form-group">
+            <label>Total Benches Available</label>
+            <input type="number" id="benches" name="benches" placeholder="Enter count" min="1" required oninput="calculateSeats()">
+        </div>
+
+        <div class="form-group">
+            <label>Total Seats (Capacity)</label>
+            <input type="number" id="capacity" name="capacity" placeholder="Auto-calculated (Benches × 2)" readonly style="background-color: #f8fafc; cursor: not-allowed; border-color: #e2e8f0; color: #64748b; font-weight: bold;">
+        </div>
+
+        <div class="btn-container">
+            <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Room</button>
+            <a href="/manage/rooms" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function calculateSeats() {
+        const benchCount = document.getElementById('benches').value;
+        const capacityField = document.getElementById('capacity');
+        
+        if (benchCount && benchCount > 0) {
+            capacityField.value = parseInt(benchCount) * 2;
+        } else {
+            capacityField.value = '';
+        }
+    }
+</script>
+{% endblock %}

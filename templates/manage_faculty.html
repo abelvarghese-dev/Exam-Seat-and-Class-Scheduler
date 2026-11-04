@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Premium Page Layout */
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    
+    /* Premium Action Toolbar */
+    .action-toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tool-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-decoration: none; border: none; cursor: pointer; transition: 0.3s; }
+    .tool-btn-primary { background: var(--btn-primary); color: white; }
+    .tool-btn-primary:hover { background: var(--btn-hover); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
+    .tool-btn-success { background: #10B981; color: white; }
+    .tool-btn-success:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+    .tool-btn-warning { background: #F59E0B; color: black; }
+    .tool-btn-warning:hover { background: #D97706; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+    .tool-btn-danger { background: #EF4444; color: white; }
+    .tool-btn-danger:hover { background: #DC2626; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+
+    /* Cards */
+    .content-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 25px; }
+
+    /* Modals */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+    .modal-content-sm { background-color: var(--card-bg); margin: 5% auto; padding: 30px; border-radius: 16px; width: 40%; max-width: 450px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideDown 0.3s ease-out; border: 1px solid var(--border-light); }
+    .close-btn { color: var(--text-secondary); float: right; font-size: 24px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .close-btn:hover { color: #EF4444; }
+    @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .selection-form select { width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--page-bg); color: var(--text-primary); margin-bottom: 20px; font-size: 1rem; }
+    .selection-form button { width: 100%; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; color: white; }
+
+</style>
+
+<div class="page-header">
+    <h2 style="color: var(--text-primary); margin: 0;">👨‍🏫 Faculty Directory</h2>
+    
+    <div class="action-toolbar">
+        <a href="/add_faculty" class="tool-btn tool-btn-success">
+            <i class="fas fa-plus"></i> Add Teacher
+        </a>
+        <button onclick="openModal('editFacultyModal')" class="tool-btn tool-btn-warning">
+            <i class="fas fa-edit"></i> Edit Details
+        </button>
+        <button onclick="openModal('deleteFacultyModal')" class="tool-btn tool-btn-danger">
+            <i class="fas fa-trash"></i> Remove
+        </button>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3 style="margin-top: 0; color: var(--text-primary); margin-bottom: 20px;">🎓 All Teachers List</h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Sl No</th>
+                    <th>Name</th>
+                    <th>Designation</th>
+                    <th>Username (ID)</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in faculty %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--text-secondary);">{{ loop.index }}</td>
+                    <td style="font-weight: 600; color: var(--text-primary);">{{ f.name }}</td>
+                    <td style="color: var(--btn-primary); font-weight: 600;">{{ f.position }}</td>
+                    <td style="color: var(--text-secondary);">{{ f.username }}</td>
+                    <td style="color: var(--text-secondary);">{{ f.email }}</td>
+                    <td>{{ f.mobile }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-chalkboard-teacher" style="font-size: 2rem; margin-bottom: 10px; display:block; color: #CBD5E1;"></i>
+                        No teachers found in the system.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div id="editFacultyModal" class="modal">
+    <div class="modal-content-sm">
+        <span class="close-btn" onclick="closeModal('editFacultyModal')">&times;</span>
+        <h3 style="color: #F59E0B; margin-top: 0; margin-bottom: 20px;"><i class="fas fa-user-edit"></i> Edit Teacher Details</h3>
+        
+        <div class="selection-form">
+            {% if faculty %}
+                <label style="display:block; margin-bottom:10px; font-weight:600; color:var(--text-secondary);">Select a teacher from the list:</label>
+                <select id="editFacultyId">
+                    <option value="">-- Choose Teacher --</option>
+                    {% for f in faculty %}
+                        <option value="{{ f.id }}">{{ f.name }} ({{ f.position }})</option>
+                    {% endfor %}
+                </select>
+                <button onclick="processAction('edit')" style="background: #F59E0B;">Proceed to Edit</button>
+            {% else %}
+                <div style="text-align: center; padding: 20px 0; color: var(--text-secondary);">
+                    No teachers available to edit.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="deleteFacultyModal" class="modal">
+    <div class="modal-content-sm">
+        <span class="close-btn" onclick="closeModal('deleteFacultyModal')">&times;</span>
+        <h3 style="color: #EF4444; margin-top: 0; margin-bottom: 20px;"><i class="fas fa-user-times"></i> Remove Teacher</h3>
+        
+        <div class="selection-form">
+            {% if faculty %}
+                <label style="display:block; margin-bottom:10px; font-weight:600; color:var(--text-secondary);">Select a teacher to remove:</label>
+                <select id="deleteFacultyId">
+                    <option value="">-- Choose Teacher --</option>
+                    {% for f in faculty %}
+                        <option value="{{ f.id }}">{{ f.name }} ({{ f.position }})</option>
+                    {% endfor %}
+                </select>
+                <button onclick="processAction('delete')" style="background: #EF4444;">Permanently Delete</button>
+            {% else %}
+                <div style="text-align: center; padding: 20px 0; color: var(--text-secondary);">
+                    No teachers available to delete.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(modalId) { document.getElementById(modalId).style.display = 'block'; }
+    function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+    // Close Modals when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) { event.target.style.display = "none"; }
+    }
+
+    // Process Edit / Delete from Dropdown
+    function processAction(actionType) {
+        var selectElement = document.getElementById(actionType + 'FacultyId');
+        var facultyId = selectElement.value;
+        
+        if (!facultyId) {
+            alert("Please select a teacher from the dropdown.");
+            return;
+        }
+
+        if (actionType === 'edit') {
+            window.location.href = "/edit/faculty/" + facultyId;
+        } else if (actionType === 'delete') {
+            if(confirm("Warning: Are you sure you want to permanently delete this teacher's record?")) {
+                window.location.href = "/delete/faculty/" + facultyId;
+            }
+        }
+    }
+</script>
+{% endblock %}

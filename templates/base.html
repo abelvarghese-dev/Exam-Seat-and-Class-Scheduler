@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --navbar-bg: #0F172A;       /* Navbar & Footer background */
+            --navbar-text: #F9FAFB;     /* Navbar text */
+            --navbar-hover: #3B82F6;    /* Navbar hover */
+            
+            --page-bg: #F1F5F9;         /* Page background */
+            --card-bg: #FFFFFF;         /* Card background */
+            --border-light: #E5E7EB;    /* Border */
+            
+            --text-primary: #0F172A;    /* Main text */
+            --text-secondary: #6B7280;  /* Secondary text */
+            
+            --btn-primary: #3B82F6;     /* Button */
+            --btn-hover: #2563EB;       /* Button hover */
+        }
+        
+        html { scroll-behavior: smooth; }
+        
+        body { 
+            margin: 0; 
+            font-family: 'Inter', sans-serif; 
+            background: var(--page-bg); 
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* NAVBAR */
+        .navbar {
+            display: flex; align-items: center; justify-content: flex-start; gap: 40px;
+            background: var(--navbar-bg) !important; padding: 0 40px; height: 70px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; text-decoration: none; display: flex; align-items: center; color: var(--navbar-text); }
+        
+        .nav-links { display: flex; gap: 15px; align-items: center; height: 100%; }
+        
+        .nav-link { 
+            text-decoration: none; color: var(--navbar-text) !important; font-weight: 500; transition: 0.3s; 
+            padding: 24px 10px; opacity: 0.85;
+        }
+        .nav-link:hover { color: var(--navbar-hover) !important; opacity: 1; }
+        .nav-link.active { 
+            color: var(--navbar-hover) !important; 
+            border-bottom: 3px solid var(--navbar-hover); opacity: 1;
+        }
+        
+        .dropdown { position: relative; height: 100%; display: flex; align-items: center; }
+        .dropbtn { 
+            cursor: pointer; font-weight: 500; color: var(--navbar-text); padding: 24px 10px; transition: 0.3s; opacity: 0.85;
+        }
+        .dropdown:hover .dropbtn, .dropbtn.active { color: var(--navbar-hover); opacity: 1; }
+        .dropbtn.active { border-bottom: 3px solid var(--navbar-hover); }
+
+        .dropdown-content {
+            display: none; position: absolute; top: 70px; left: 0;
+            background-color: var(--card-bg); min-width: 200px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1;
+            border-radius: 0 0 8px 8px; border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+        .dropdown-content a {
+            color: var(--text-secondary); padding: 12px 16px; text-decoration: none; display: block; transition: 0.2s; font-weight: 500;
+        }
+        .dropdown-content a:hover { background-color: var(--page-bg); color: var(--navbar-hover); }
+        .dropdown:hover .dropdown-content { display: block; }
+
+        /* BUTTONS */
+        .login-btn { 
+            background: var(--btn-primary); 
+            color: #ffffff !important; 
+            padding: 9px 24px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .login-btn:hover { background: var(--btn-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+
+        /* CONTENT AREA */
+        .main-content { flex: 1; }
+        .container { padding: 40px; max-width: 1200px; margin: auto; }
+        
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-light); }
+        th, td { padding: 15px; border-bottom: 1px solid var(--border-light); text-align: left; }
+        th { background: var(--page-bg); color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+        
+        input, select { background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border-light); padding: 10px; margin: 5px 0; border-radius: 6px; box-sizing: border-box; }
+        input:focus, select:focus { outline: none; border-color: var(--btn-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        
+        button { padding: 10px 20px; background: var(--btn-primary); color: white; border: none; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.3s; }
+        button:hover { background: var(--btn-hover); }
+
+        /* FOOTER */
+        .custom-footer { 
+            background: var(--navbar-bg); 
+            color: #9CA3AF; 
+            text-align: center; 
+            padding: 30px 20px; 
+            width: 100%;
+            box-sizing: border-box;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: auto;
+        }
+        .custom-footer h3 { margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 700; color: var(--navbar-text); }
+        .custom-footer p { font-size: 0.85rem; margin: 0; line-height: 1.6; }
+
+        /* --- Admin Premium Profile Dropdown Styles --- */
+        .profile-menu { position: relative; display: inline-block; cursor: pointer; margin-left: auto; }
+        .profile-icon { 
+            width: 44px; height: 44px; border-radius: 50%; 
+            border: 2px solid #e2e8f0; transition: all 0.3s ease; 
+            padding: 2px; background: white; display: flex; align-items: center; justify-content: center;
+        }
+        .profile-icon:hover { border-color: #3b82f6; box-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
+        .profile-icon img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+        .profile-dropdown { 
+            display: none; position: absolute; right: 0; top: 58px; 
+            background-color: #ffffff; min-width: 230px; 
+            box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12); 
+            border-radius: 16px; overflow: hidden; z-index: 2000; 
+            border: 1px solid rgba(226, 232, 240, 0.8); 
+            transform-origin: top right;
+            animation: dropFade 0.3s ease-out forwards; 
+        }
+        .profile-dropdown.show { display: block; }
+        
+        .dropdown-header-fancy { padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; text-align: center; }
+        .greeting-text { margin: 0; font-size: 0.8rem; color: #64748b; font-weight: 600; }
+        .user-name-text { margin: 3px 0 0; font-size: 1rem; color: #1e293b; font-weight: 800; text-transform: capitalize; }
+
+        .dropdown-links { padding: 12px; }
+        .dropdown-item { 
+            padding: 10px 12px; display: flex; align-items: center; gap: 12px; 
+            color: #334155; text-decoration: none; font-weight: 600; 
+            border-radius: 10px; transition: all 0.2s ease; font-size: 0.9rem;
+        }
+        .dropdown-item:hover { background-color: #f8fafc; color: #3b82f6; transform: translateX(5px); }
+        
+        .item-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .bg-blue-light { background: #eff6ff; color: #3b82f6; }
+        .bg-purple-light { background: #faf5ff; color: #a855f7; }
+        .bg-red-light { background: #fef2f2; color: #ef4444; }
+        .logout-item:hover { color: #ef4444; }
+        .dropdown-divider { height: 1px; background: #e2e8f0; margin: 8px 10px; }
+        
+        @keyframes dropFade { 
+            from { opacity: 0; transform: translateY(-10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        @media print {
+            .navbar, .btn-delete, .btn-edit, form, .custom-footer { display: none !important; }
+            .container { padding: 0; margin: 0; background: white; color: black; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <span style="position: relative; display: flex; align-items: center; margin-right: 10px;">
+                <i class="fas fa-book-open" style="color: var(--navbar-hover); font-size: 1.6rem;"></i>
+                <i class="fas fa-check-circle" style="color: #10B981; font-size: 0.8rem; position: absolute; bottom: -2px; right: -4px;"></i>
+            </span>
+            <span style="color: var(--navbar-text);">ExamSystem</span>
+        </a>
+        
+        <div class="nav-links">
+            {% if session['role'] == 'admin' %}
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
+                <a href="/admin/timetable" class="nav-link {% if request.path == '/admin/timetable' %}active{% endif %}">Time Table</a>
+                <a href="/admin/seatplan" class="nav-link {% if request.path == '/admin/seatplan' %}active{% endif %}">Seat Plan</a>
+                
+                <div class="dropdown">
+                    <div class="dropbtn {% if '/manage/' in request.path or '/admin_approve' in request.path %}active{% endif %}">Data Management ▾</div>
+                    <div class="dropdown-content">
+                        <a href="/manage/students">Students List</a>
+                        <a href="/manage/faculty">Teachers List</a>
+                        <a href="/manage/subjects">Subjects List</a>
+                        <a href="/manage/rooms">Rooms & Halls</a>
+                        <hr style="margin: 5px 0; border: 0; border-top: 1px solid var(--border-light);">
+                        <a href="/admin_approve">Approvals</a>
+                    </div>
+                </div>
+                <a href="/about" class="nav-link {% if request.path == '/about' %}active{% endif %}">About</a>
+
+            {% elif session['role'] == 'faculty' %}
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
+                <a href="/faculty/timetable" class="nav-link {% if request.path == '/faculty/timetable' %}active{% endif %}">Time Table</a>
+                <a href="/faculty/seating" class="nav-link {% if request.path == '/faculty/seating' %}active{% endif %}">Seating Plan</a>
+                <a href="/faculty/profile" class="nav-link {% if '/profile' in request.path %}active{% endif %}">Profile</a>
+                <a href="/about" class="nav-link {% if request.path == '/about' %}active{% endif %}">About</a>
+
+            {% elif session['role'] == 'student' %}
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
+                <a href="/student" class="nav-link {% if request.path == '/student' %}active{% endif %}">Seating Status</a>
+                <a href="/student/timetable" class="nav-link {% if '/timetable' in request.path %}active{% endif %}">Time Table</a>
+                <a href="/student/profile" class="nav-link {% if '/profile' in request.path %}active{% endif %}">Profile</a>
+                <a href="/about" class="nav-link {% if request.path == '/about' %}active{% endif %}">About</a>
+
+            {% else %}
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
+                <a href="/about" class="nav-link {% if request.path == '/about' %}active{% endif %}">About</a>
+            {% endif %}
+        </div>
+
+        <div style="margin-left: auto; display: flex; align-items: center;">
+            {% if session.get('user_id') %}
+                <div class="profile-menu">
+                    <div class="profile-icon" onclick="toggleProfileDropdown()">
+                        <img src="/static/uploads/{{ session.get('user_photo') if session.get('user_photo') else 'default.png' }}" 
+                            alt="Profile" 
+                            onerror="this.src='https://ui-avatars.com/api/?name={{ session.get('user_name', 'User') | replace(' ', '+') }}&background=3B82F6&color=fff'">
+                    </div>
+                    
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="dropdown-header-fancy" style="padding: 20px 15px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0;">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <span style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Welcome</span>
+                                <h4 class="user-name-text" style="margin: 0; font-size: 1.15rem; color: #1e293b; font-weight: 800; display: flex; align-items: center;">
+                                    {{ session.get('user_name', 'User') }}
+                                </h4>
+                                <div style="margin-top: 6px; padding: 4px 12px; background: white; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                    <i class="fas fa-circle" style="font-size: 7px; color: #10B981;"></i>
+                                    <span style="font-size: 0.75rem; color: #475569; font-weight: 700; text-transform: capitalize;">
+                                        {{ session.get('role', 'User') }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dropdown-links">
+                            
+                            {% if session.get('role') == 'admin' %}
+                                <a href="/admin/profile" class="dropdown-item">
+                                    <div class="item-icon bg-blue-light"><i class="fas fa-user-tie"></i></div>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="/admin/edit_profile" class="dropdown-item">
+                                    <div class="item-icon bg-purple-light"><i class="fas fa-user-edit"></i></div>
+                                    <span>Edit Profile</span>
+                                </a>
+                                <a href="/admin/change_password" class="dropdown-item">
+                                    <div class="item-icon bg-purple-light"><i class="fas fa-key"></i></div>
+                                    <span>Change Password</span>
+                                </a>
+
+                            {% elif session.get('role') == 'faculty' %}
+                                <a href="/faculty/profile" class="dropdown-item">
+                                    <div class="item-icon bg-blue-light"><i class="fas fa-user-tie"></i></div>
+                                    <span>My Profile</span>
+                                </a>
+
+                                <a href="/faculty/profile?mode=edit" class="dropdown-item">
+                                    <div class="item-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fas fa-user-edit"></i></div>
+                                    <span>Edit Profile</span>
+                                </a>
+
+                                <a href="/faculty/change_password" class="dropdown-item">
+                                    <div class="item-icon" style="background: #fef08a; color: #ca8a04;"><i class="fas fa-key"></i></div>
+                                    <span>Change Password</span>
+                                </a>
+
+                            {% elif session.get('role') == 'student' %}
+                                <a href="/student/profile" class="dropdown-item">
+                                    <div class="item-icon bg-blue-light"><i class="fas fa-user-graduate"></i></div>
+                                    <span>My Profile</span>
+                                </a>
+
+                                <a href="/student/profile?mode=edit" class="dropdown-item">
+                                    <div class="item-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fas fa-user-edit"></i></div>
+                                    <span>Edit Profile</span>
+                                </a>
+                                <a href="/student/change_password" class="dropdown-item">
+                                    <div class="item-icon" style="background: #fef08a; color: #ca8a04;"><i class="fas fa-key"></i></div>
+                                    <span>Change Password</span>
+                                </a>
+                            {% endif %}
+
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="/logout" class="dropdown-item logout-item">
+                                <div class="item-icon bg-red-light"><i class="fas fa-sign-out-alt"></i></div>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <a href="/login" class="login-btn">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="custom-footer">
+        <h3>Catholicate College, Pathanamthitta</h3>
+        <p>Empowering minds since 1952. | &copy; 2026 Dept. of Computer Applications</p>
+        <p style="opacity: 0.8; font-size: 0.75rem; margin-top: 8px;">Developed by Abel Varghese</p>
+    </footer>
+
+<script>
+    // Form Validation Logic
+    function validateMyForm(event) {
+        const mobile = document.getElementById('mobile');
+        if (mobile && mobile.value !== "") {
+            const mobileRegex = /^[0-9]{10}$/;
+            if (!mobileRegex.test(mobile.value)) {
+                alert("Mobile number must be exactly 10 digits! (മൊബൈൽ നമ്പർ 10 അക്കം ആയിരിക്കണം)");
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        const password = document.getElementById('password');
+        if (password && password.value !== "") {
+            const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+            if (!passRegex.test(password.value)) {
+                alert("Password Requirements:\n- Minimum 6 characters\n- 1 Uppercase letter\n- 1 Number\n- 1 Symbol");
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        const confirmPass = document.getElementById('confirm_password');
+        if (password && confirmPass && confirmPass.value !== "") {
+            if (password.value !== confirmPass.value) {
+                alert("Passwords do not match!");
+                event.preventDefault();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Profile Dropdown Logic (Only for Admin)
+    function toggleProfileDropdown() {
+        var dropdown = document.getElementById("profileDropdown");
+        if (dropdown) {
+            dropdown.classList.toggle("show");
+        }
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.closest('.profile-menu')) {
+            var dropdowns = document.getElementsByClassName("profile-dropdown");
+            for (var i = 0; i < dropdowns.length; i++) {
+                if (dropdowns[i].classList.contains('show')) {
+                    dropdowns[i].classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>

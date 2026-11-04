@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
+<style>
+    /* Simple & Clean Profile Card */
+    .profile-card {
+        max-width: 500px; 
+        margin: 40px auto; 
+        background: white; 
+        padding: 40px 30px; 
+        border-radius: 16px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid #f1f5f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Image Containers */
+    .img-container, .pic-wrapper {
+        width: 130px; height: 130px; 
+        margin: 0 auto 25px auto;
+        border-radius: 50%; 
+        border: 4px solid #f8fafc;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        background-color: #f1f5f9; 
+        overflow: hidden; 
+        display: flex; align-items: center; justify-content: center;
+        position: relative;
+    }
+
+    .profile-img, .pic-wrapper img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    
+    /* Edit Mode Image Hover */
+    .pic-wrapper { cursor: pointer; transition: 0.3s; }
+    .pic-overlay {
+        position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); 
+        display: flex; flex-direction: column; justify-content: center; align-items: center; 
+        opacity: 0; transition: 0.3s; color: white;
+    }
+    .pic-wrapper:hover .pic-overlay { opacity: 1; }
+    .pic-overlay i { font-size: 1.5rem; margin-bottom: 5px; }
+    .pic-overlay span { font-size: 0.8rem; font-weight: 600; }
+
+    /* View Mode Info Rows */
+    .info-row { margin-bottom: 18px; border-bottom: 1px solid #f8fafc; padding-bottom: 12px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
+    .info-value { font-size: 1.05rem; font-weight: 600; color: #1e293b; }
+
+    /* Edit Mode Form */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.9rem; font-weight: 600; color: #475569; margin-bottom: 8px; }
+    .form-control {
+        width: 100%; padding: 12px 15px; border-radius: 10px;
+        border: 1px solid #cbd5e1; background: #fff; color: #1e293b;
+        font-size: 1rem; transition: 0.3s; box-sizing: border-box;
+    }
+    .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .form-control[readonly] { background: #f8fafc; color: #64748b; cursor: not-allowed; }
+
+    /* Buttons */
+    .btn { width: 100%; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s; border: none; }
+    .btn-edit { background: #eff6ff; color: #2563eb; margin-top: 10px; }
+    .btn-edit:hover { background: #dbeafe; }
+    
+    .action-btns { display: flex; gap: 15px; margin-top: 30px; }
+    .btn-cancel { background: #f1f5f9; color: #475569; flex: 1; }
+    .btn-cancel:hover { background: #e2e8f0; }
+    .btn-save { background: #10b981; color: white; flex: 1; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+    .btn-save:hover { background: #059669; }
+
+    /* --- Crop Modal Styles (Circle Shade) --- */
+    .crop-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .crop-container { background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 400px; }
+    .crop-img-area { width: 100%; max-height: 350px; margin-bottom: 20px; background-color: #f8fafc; }
+    
+    .cropper-view-box, .cropper-face {
+        border-radius: 50%;
+        outline: none !important; 
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.7); 
+    }
+</style>
+
+<div class="profile-card">
+    
+    {% if msg %}
+        <div style="background: {{ '#fef2f2' if 'Error' in msg else '#ecfdf5' }}; color: {{ '#b91c1c' if 'Error' in msg else '#059669' }}; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 25px; font-weight: 600; font-size: 0.9rem;">
+            {{ msg }}
+        </div>
+    {% endif %}
+
+    <div id="view-mode">
+        <h2 style="text-align: center; color: #1e293b; margin: 0 0 25px 0;">My Profile</h2>
+
+        <div class="img-container">
+            <img src="{{ url_for('static', filename='uploads/' + (student.photo if student.photo else 'default.png')) }}?v={{ range(1, 1000) | random }}" 
+                 class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name={{ student.name | default('User') | replace(' ', '+') }}&background=e2e8f0&color=475569'">
+        </div>
+
+        <div>
+            <div class="info-row">
+                <span class="info-label">Full Name</span>
+                <div class="info-value">{{ student.name }}</div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Register Number</span>
+                <div class="info-value" style="color: #3b82f6; font-family: monospace;">{{ student.reg_no }}</div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Course & Semester</span>
+                <div class="info-value">{{ student.course_name }} (Sem {{ student.semester }})</div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Mobile Number</span>
+                <div class="info-value">{{ student.mobile }}</div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email Address</span>
+                <div class="info-value">{{ student.email }}</div>
+            </div>
+        </div>
+
+        <button onclick="toggleMode('edit')" class="btn btn-edit">
+            <i class="fas fa-pen" style="margin-right: 8px;"></i> Edit Details
+        </button>
+    </div>
+
+    <div id="edit-mode" style="display: none;">
+        <h2 style="text-align: center; color: #1e293b; margin: 0 0 25px 0;">Edit Profile</h2>
+
+        <form method="post" enctype="multipart/form-data" id="profileForm">
+            
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div class="pic-wrapper" onclick="document.getElementById('imageUpload').click()">
+                    <img id="profilePreview" src="{{ url_for('static', filename='uploads/' + (student.photo if student.photo else 'default.png')) }}?v={{ range(1, 1000) | random }}" onerror="this.src='https://ui-avatars.com/api/?name={{ student.name | default('User') | replace(' ', '+') }}&background=e2e8f0&color=475569'">
+                    <div class="pic-overlay">
+                        <i class="fas fa-camera"></i>
+                        <span>Change Photo</span>
+                    </div>
+                </div>
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                <input type="hidden" name="current_photo" value="{{ student.photo }}">
+                <input type="hidden" name="cropped_image" id="croppedImageInput">
+                
+                <input type="hidden" name="password" value="{{ student.password }}">
+            </div>
+
+            <div class="form-group">
+                <label>Register Number</label>
+                <input type="text" class="form-control" value="{{ student.reg_no }}" readonly>
+            </div>
+            <div class="form-group">
+                <label>Course Name</label>
+                <input type="text" class="form-control" value="{{ student.course_name }}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" class="form-control" value="{{ student.name }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" class="form-control" value="{{ student.email }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="text" name="mobile" class="form-control" value="{{ student.mobile }}" required>
+            </div>
+
+            <div class="action-btns">
+                <button type="button" class="btn btn-cancel" onclick="toggleMode('view')">Cancel</button>
+                <button type="submit" class="btn btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="crop-modal" id="cropModal">
+    <div class="crop-container">
+        <h3 style="margin-top:0; color: #1e293b; text-align: center; margin-bottom: 20px;">Adjust Photo</h3>
+        <div class="crop-img-area">
+            <img id="imageToCrop" src="">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-cancel" onclick="closeCropModal()">Cancel</button>
+            <button type="button" class="btn btn-save" id="cropBtn" style="background: #3b82f6;">Crop & Set</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+    // 🛑 URL ചെക്ക് ചെയ്ത് നേരെ Edit ഫോം തുറക്കാനുള്ള കോഡ് 
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('mode') === 'edit') {
+            toggleMode('edit'); 
+        }
+    };
+
+    function toggleMode(mode) {
+        var view = document.getElementById('view-mode');
+        var edit = document.getElementById('edit-mode');
+        if (mode === 'edit') {
+            view.style.display = 'none';
+            edit.style.display = 'block';
+        } else {
+            edit.style.display = 'none';
+            view.style.display = 'block';
+        }
+    }
+
+    // --- CROPPER LOGIC ---
+    let cropper;
+    const imageUpload = document.getElementById('imageUpload');
+    const imageToCrop = document.getElementById('imageToCrop');
+    const cropModal = document.getElementById('cropModal');
+    const profilePreview = document.getElementById('profilePreview');
+    const croppedImageInput = document.getElementById('croppedImageInput');
+
+    imageUpload.addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imageToCrop.src = event.target.result;
+                cropModal.style.display = 'flex'; 
+                
+                if (cropper) cropper.destroy(); 
+                
+                cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 1, 
+                    viewMode: 1,
+                    guides: false, 
+                    cropBoxResizable: true,
+                    autoCropArea: 0.8,
+                    background: false
+                });
+            };
+            reader.readAsDataURL(files[0]);
+        }
+    });
+
+    document.getElementById('cropBtn').addEventListener('click', function() {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+        const base64Image = canvas.toDataURL('image/jpeg');
+        
+        profilePreview.src = base64Image;
+        croppedImageInput.value = base64Image;
+        closeCropModal();
+    });
+
+    function closeCropModal() {
+        cropModal.style.display = 'none';
+        imageUpload.value = ''; 
+    }
+</script>
+{% endblock %}

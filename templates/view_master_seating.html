@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>🪑 Master Seating Arrangement</h2>
+        <button onclick="window.print()" style="background: #6c757d;">Print List</button>
+    </div>
+    <p>This is the permanent seating plan for all upcoming exams.</p>
+
+    <div style="background: white; padding: 20px; border-radius: 10px;">
+        <table>
+            <thead>
+                <tr style="background: #333; color: white;">
+                    <th>Room No</th>
+                    <th>Seat No</th>
+                    <th>Student Name</th>
+                    <th>Reg No</th>
+                    <th>Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in seating %}
+                <tr>
+                    <td style="font-weight: bold; font-size: 1.2rem; color: #d63384;">{{ s.room_no }}</td>
+                    <td style="font-weight: bold; font-size: 1.2rem;">{{ s.seat_no }}</td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.reg_no }}</td>
+                    <td>{{ s.course_name }} - S{{ s.semester }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

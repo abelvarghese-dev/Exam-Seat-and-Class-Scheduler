@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 900px; margin: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: #1e293b; margin: 0;"><i class="fas fa-eye"></i> Seating Draft Preview</h2>
+        <span style="background: #fef08a; color: #854d0e; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+            Status: DRAFT (Not Published)
+        </span>
+    </div>
+
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+        <p style="color: #475569; margin-top: 0;">Review the arrangement below. If it looks good, click Confirm to publish it. Once published, students and faculty can view their respective duties/seats.</p>
+        
+        <form method="POST" style="display: flex; gap: 15px;">
+            <button type="submit" name="publish" style="background: #10b981; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; flex: 1;">
+                <i class="fas fa-check-circle"></i> Confirm & Publish Seating
+            </button>
+            <button type="submit" name="cancel_draft" onclick="return confirm('Are you sure you want to discard this draft?')" style="background: #ef4444; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; flex: 1;">
+                <i class="fas fa-trash-alt"></i> Cancel Draft
+            </button>
+        </form>
+    </div>
+
+    {% for room_id, data in grouped_data.items() %}
+    <div style="background: white; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        
+        <div style="background: #1e293b; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.2rem;"><i class="fas fa-door-open"></i> Room Number: {{ data.room_no }}</h3>
+            <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 6px; font-size: 0.9rem;">
+                <i class="fas fa-user-tie"></i> Invigilator: <b>{{ data.faculty }}</b>
+            </span>
+        </div>
+
+        <div style="padding: 15px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f1f5f9; text-align: left;">
+                        <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569; text-align: center;">Seat No</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569;">Register No</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569;">Student Name</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569;">Course</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569; text-align: center;">Bench & Side</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for st in data.students %}
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 10px; text-align: center; font-weight: bold; color: #ef4444; font-size: 1.1rem;">{{ st.seat_no }}</td>
+                        <td style="padding: 10px; font-weight: bold; color: #0f172a;">{{ st.reg_no }}</td>
+                        <td style="padding: 10px; color: #334155;">{{ st.name }}</td>
+                        <td style="padding: 10px; color: #64748b;">{{ st.dept }}</td>
+                        <td style="padding: 10px; text-align: center; color: #64748b;">Bench {{ st.bench_no }} ({{ st.side }})</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

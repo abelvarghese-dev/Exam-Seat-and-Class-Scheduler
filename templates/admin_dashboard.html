@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div style="margin-bottom: 30px;">
+        <h2 style="color: #333; margin-bottom: 5px;">🚀 Admin Dashboard</h2>
+        <p style="color: #666; font-size: 1.1rem;">Welcome back! Here is the system overview.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 40px;">
+        
+        <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 5px solid #0d6efd; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <h3 style="margin: 0; color: #555; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Total Students</h3>
+            <p style="font-size: 2.5rem; font-weight: bold; margin: 10px 0; color: #333;">{{ s_count }}</p>
+            <a href="/manage/students" style="color: #0d6efd; text-decoration: none; font-weight: bold;">Manage Students →</a>
+        </div>
+
+        <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 5px solid #d63384; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <h3 style="margin: 0; color: #555; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Total Teachers</h3>
+            <p style="font-size: 2.5rem; font-weight: bold; margin: 10px 0; color: #333;">{{ f_count }}</p>
+            <a href="/manage/faculty" style="color: #d63384; text-decoration: none; font-weight: bold;">Manage Faculty →</a>
+        </div>
+
+        <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 5px solid #198754; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <h3 style="margin: 0; color: #555; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Scheduled Exams</h3>
+            <p style="font-size: 2.5rem; font-weight: bold; margin: 10px 0; color: #333;">{{ e_count }}</p>
+            <a href="/admin/timetable" style="color: #198754; text-decoration: none; font-weight: bold;">View Schedule →</a>
+        </div>
+
+        <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 5px solid #ffc107; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <h3 style="margin: 0; color: #555; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Total Rooms</h3>
+            <p style="font-size: 2.5rem; font-weight: bold; margin: 10px 0; color: #333;">{{ r_count }}</p>
+            <a href="/manage/rooms" style="color: #bfa100; text-decoration: none; font-weight: bold;">Manage Rooms →</a>
+        </div>
+
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+        <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">⚡ Quick Actions</h3>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            
+            <a href="/admin/timetable" style="
+                flex: 1; min-width: 200px;
+                padding: 20px; 
+                background: linear-gradient(135deg, #0d6efd, #0a58ca); 
+                color: white; 
+                text-decoration: none; 
+                border-radius: 10px; 
+                font-weight: bold; 
+                text-align: center;
+                box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                📅 Create Time Table &<br>Generate Seating
+            </a>
+
+            <a href="/admin_approve" style="
+                flex: 1; min-width: 200px;
+                padding: 20px; 
+                background: linear-gradient(135deg, #6c757d, #495057); 
+                color: white; 
+                text-decoration: none; 
+                border-radius: 10px; 
+                font-weight: bold; 
+                text-align: center;
+                box-shadow: 0 4px 6px rgba(108, 117, 125, 0.2);
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                ✅ Approve New<br>Students & Teachers
+            </a>
+
+            <a href="/manage/subjects" style="
+                flex: 1; min-width: 200px;
+                padding: 20px; 
+                background: linear-gradient(135deg, #198754, #146c43); 
+                color: white; 
+                text-decoration: none; 
+                border-radius: 10px; 
+                font-weight: bold; 
+                text-align: center;
+                box-shadow: 0 4px 6px rgba(25, 135, 84, 0.2);
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                📚 Add Subjects<br>& Departments
+            </a>
+
+        </div>
+    </div>
+{% endblock %}

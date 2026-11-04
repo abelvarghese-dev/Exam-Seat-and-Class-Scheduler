@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .navbar, .custom-footer { display: none !important; }
+    body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; } 
+    .main-content, .container { padding: 0 !important; max-width: 100% !important; margin: 0 !important; height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+    .reg-wrapper {
+        background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)), 
+                    url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+        height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 12px 35px;
+        width: 90%; max-width: 410px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); color: white; text-align: center;
+        animation: slideUp 0.5s ease-out forwards;
+    }
+
+    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    .logo-container i { font-size: 1.6rem; color: #10B981; margin-bottom: 5px; }
+    .glass-card h2 { margin: 0 0 3px; font-weight: 800; font-size: 1.3rem; }
+    .glass-card p { margin: 0 0 10px; font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .input-group { position: relative; margin-bottom: 7px; text-align: left; }
+    .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.5); font-size: 0.8rem; pointer-events: none; }
+    
+    .glass-input {
+        width: 100%; padding: 8px 10px 8px 42px; background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: white; font-size: 0.75rem;
+        box-sizing: border-box; outline: none; transition: 0.2s; appearance: none;
+    }
+    .glass-input:focus { border-color: #10B981; background: rgba(0, 0, 0, 0.5); }
+    
+    select.glass-input { cursor: pointer; }
+    select.glass-input option { background-color: #1e293b; color: white; }
+
+    .reg-submit {
+        width: 100%; padding: 10px; border: none; border-radius: 10px;
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 5px;
+    }
+    .reg-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
+    .back-link { display: inline-block; margin-top: 5px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.7rem; }
+</style>
+
+<div class="reg-wrapper">
+    <div class="glass-card">
+        <div class="logo-container"><i class="fas fa-user-graduate"></i></div>
+        <h2>Student Join</h2>
+        <p>Enter your details below</p>
+
+        <form id="studentRegForm" method="POST" action="/register_student">
+            <div class="input-group"><input type="text" name="name" class="glass-input" placeholder="Full Name" required autocomplete="off"><i class="fas fa-user"></i></div>
+            <div class="input-group"><input type="text" name="reg_no" class="glass-input" placeholder="Register Number" required autocomplete="off"><i class="fas fa-id-card"></i></div>
+            
+            <div style="display: flex; gap: 8px;">
+                <div class="input-group" style="flex: 2;">
+                    <select name="course_id" class="glass-input" required>
+                        <option value="" disabled selected>Select Course</option>
+                        {% for c in courses %}
+                            <option value="{{ c.id }}">{{ c.course_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fas fa-book"></i>
+                </div>
+                
+                <div class="input-group" style="flex: 1;">
+                    <select name="semester" class="glass-input" required>
+                        <option value="" disabled selected>Sem</option>
+                        {% for i in range(1, 9) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fas fa-layer-group"></i>
+                </div>
+            </div>
+
+            <div class="input-group"><input type="email" name="email" class="glass-input" placeholder="Email Address" required autocomplete="off"><i class="fas fa-envelope"></i></div>
+            <div class="input-group"><input type="text" name="mobile" id="mobile" class="glass-input" placeholder="Mobile Number" required autocomplete="off"><i class="fas fa-phone"></i></div>
+            
+            <div class="input-group"><input type="password" name="password" id="password" class="glass-input" placeholder="Password" required><i class="fas fa-lock"></i></div>
+            <div class="input-group"><input type="password" name="confirm_password" id="confirm_password" class="glass-input" placeholder="Confirm Password" required><i class="fas fa-check-double"></i></div>
+            
+            <button type="submit" class="reg-submit">Register Now</button>
+        </form>
+        <a href="/login" class="back-link"><i class="fas fa-arrow-left"></i> Back to Login</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('studentRegForm').onsubmit = function(e) {
+        e.preventDefault();
+        
+        // 1. Mobile Check
+        const mobile = document.getElementById('mobile').value;
+        if (!/^[0-9]{10}$/.test(mobile)) {
+            Swal.fire({ icon: 'error', title: 'Invalid Mobile', text: 'Mobile number must be 10 digits!', background: '#1e293b', color: '#fff' });
+            return;
+        }
+
+        // 2. Password Check (Pass321. now works)
+        const pass = document.getElementById('password').value;
+        const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{6,}$/;
+        if (!passRegex.test(pass)) {
+            Swal.fire({ 
+                icon: 'error', title: 'Weak Password', 
+                html: 'Password must have:<br>• Min 6 chars<br>• 1 Uppercase<br>• 1 Number<br>• 1 Symbol', 
+                background: '#1e293b', color: '#fff' 
+            });
+            return;
+        }
+
+        // 3. Match Check
+        const confirmPass = document.getElementById('confirm_password').value;
+        if(pass !== confirmPass) {
+            Swal.fire({ icon: 'error', title: 'Mismatch', text: 'Passwords do not match!', background: '#1e293b', color: '#fff' });
+            return;
+        }
+        
+        // Final Submission with Approval Popup
+        fetch(this.action, { method: 'POST', body: new FormData(this) })
+        .then(response => response.json()) 
+        .then(data => {
+            if(data.status === "success") {
+                Swal.fire({ 
+                    title: 'Registration Sent!', 
+                    text: 'Please wait for Admin Approval.', 
+                    icon: 'success', 
+                    background: '#1e293b', color: '#fff',
+                    confirmButtonColor: '#10B981'
+                }).then(() => {
+                    window.location.href = "/login";
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message, background: '#1e293b', color: '#fff' });
+            }
+        });
+    };
+</script>
+{% endblock %}

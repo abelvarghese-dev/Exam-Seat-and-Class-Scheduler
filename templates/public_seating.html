@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .btn-print { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+    .btn-print:hover { background: #059669; }
+    
+    @media print {
+        .no-print, #searchInput { display: none !important; }
+        body { background: white; }
+        #seatingTable { width: 100%; border-collapse: collapse; }
+        #seatingTable th, #seatingTable td { border: 1px solid #000 !important; padding: 8px; color: black; }
+        #seatingTable th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; }
+    }
+</style>
+
+<div class="header-flex no-print">
+    <div>
+        <h2 style="margin: 0;">🏫 All Students Seating Arrangement</h2>
+        <p style="margin: 5px 0 0 0; color: #64748b;">This is the master seating plan for everyone.</p>
+    </div>
+    <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Print List</button>
+</div>
+
+<input type="text" id="searchInput" class="no-print" onkeyup="searchTable()" placeholder="Search for names or reg no..." style="padding: 12px; width: 100%; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none;">
+
+<div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; overflow-x: auto;">
+    <table id="seatingTable" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                <th style="padding: 12px;">Room</th>
+                <th style="padding: 12px;">Seat</th>
+                <th style="padding: 12px;">Name</th>
+                <th style="padding: 12px;">Reg No</th>
+                <th style="padding: 12px;">Class</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in seating %}
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 12px; font-weight: bold; color: #d63384;">{{ s.room_no }}</td>
+                <td style="padding: 12px; font-weight: bold;">{{ s.seat_no }}</td>
+                <td style="padding: 12px;">{{ s.name }}</td>
+                <td style="padding: 12px;">{{ s.reg_no }}</td>
+                <td style="padding: 12px; color: #3b82f6; font-weight: 600;">{{ s.course_name }} - S{{ s.semester }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function searchTable() {
+    var input, filter, table, tr, td, td2, i, txtValue;
+    input = document.getElementById("searchInput");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("seatingTable");
+    tr = table.getElementsByTagName("tr");
+    
+    for (i = 1; i < tr.length; i++) { // Header row ഒഴിവാക്കാൻ i=1
+        td = tr[i].getElementsByTagName("td")[2]; // Name
+        td2 = tr[i].getElementsByTagName("td")[3]; // RegNo
+        if (td || td2) {
+            txtValue = (td.textContent || td.innerText) + " " + (td2.textContent || td2.innerText);
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
+</script>
+{% endblock %}

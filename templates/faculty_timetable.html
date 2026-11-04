@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header { margin-bottom: 25px; }
+    .content-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 25px; }
+    
+    /* Accordion Styles */
+    .dept-acc { background-color: #F8FAFC; color: #1E293B; cursor: pointer; padding: 16px 20px; width: 100%; border: 1px solid var(--border-light); text-align: left; outline: none; font-size: 1.05rem; transition: 0.3s; border-radius: 8px; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .dept-acc.active, .dept-acc:hover { background-color: #EFF6FF; border-color: #3B82F6; color: #1D4ED8; }
+    .dept-panel { padding: 0 20px; background-color: white; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-radius: 0 0 8px 8px; margin-top: -10px; margin-bottom: 20px; border: 1px solid var(--border-light); border-top: none; }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; margin: 15px 0; }
+    th { padding: 12px; border-bottom: 2px solid var(--border-light); color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; }
+    td { padding: 12px; border-bottom: 1px solid #eee; color: var(--text-primary); }
+    
+    .status-badge { padding: 5px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; display: inline-block; }
+    .badge-upcoming { background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; }
+</style>
+
+<div class="page-header">
+    <h2 style="color: var(--text-primary); margin: 0;"><i class="fas fa-calendar-alt"></i> College Time Table</h2>
+    <p style="color: var(--text-secondary); margin-top: 5px;">View upcoming and past exams grouped by Department and Semester.</p>
+</div>
+
+<div class="content-card" style="border-top: 4px solid #3B82F6;">
+    <h3 style="margin-top: 0; color: #1D4ED8; margin-bottom: 20px;"><i class="fas fa-clock"></i> Upcoming Exams by Department</h3>
+    
+    {% if upcoming_grouped %}
+        {% for dept, exams in upcoming_grouped.items() %}
+            <button type="button" class="dept-acc">
+                <span><i class="fas fa-graduation-cap" style="color:#3B82F6; margin-right:8px;"></i> {{ dept }}</span> 
+                <span style="font-size:0.8rem;">▼</span>
+            </button>
+            <div class="dept-panel">
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Session</th>
+                                <th>Exam Name</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ex in exams %}
+                            <tr>
+                                <td style="font-weight: bold;">{{ ex.exam_date.strftime('%d-%m-%Y') }}</td>
+                                <td><b>{{ ex.exam_time }}</b></td>
+                                <td>{{ ex.exam_name }}</td>
+                                <td style="color: #3B82F6; font-weight: 600;">{{ ex.subject_name }}</td>
+                                <td><span class="status-badge badge-upcoming">Upcoming</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: var(--text-secondary); text-align: center; padding: 20px;">No upcoming exams scheduled.</p>
+    {% endif %}
+</div>
+
+<div class="content-card" style="border-top: 4px solid #10B981;">
+    <h3 style="margin-top: 0; color: #065F46; margin-bottom: 20px;"><i class="fas fa-history"></i> Exam History</h3>
+    
+    {% if history_grouped %}
+        {% for dept, exams in history_grouped.items() %}
+            <button type="button" class="dept-acc" style="background-color: #F8FAFC; color: #475569;">
+                <span><i class="fas fa-check-circle" style="color:#10B981; margin-right:8px;"></i> {{ dept }}</span> 
+                <span style="font-size:0.8rem;">▼</span>
+            </button>
+            <div class="dept-panel">
+                <div style="overflow-x: auto;">
+                    <table style="opacity: 0.85;">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Session</th>
+                                <th>Exam Name</th>
+                                <th>Subject</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ex in exams %}
+                            <tr>
+                                <td style="font-weight: bold;">{{ ex.exam_date.strftime('%d-%m-%Y') }}</td>
+                                <td>{{ ex.exam_time }}</td>
+                                <td>{{ ex.exam_name }}</td>
+                                <td style="font-weight: 600;">{{ ex.subject_name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: var(--text-secondary); text-align: center; padding: 20px;">No past exams found.</p>
+    {% endif %}
+</div>
+
+<script>
+    // Accordion Logic
+    var acc = document.getElementsByClassName("dept-acc");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            } 
+        });
+    }
+</script>
+{% endblock %}

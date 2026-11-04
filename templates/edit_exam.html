@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .edit-card {
+        background: white; padding: 30px 40px; border-radius: 12px;
+        border: 1px solid #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        max-width: 600px; margin: 40px auto;
+    }
+    .edit-header {
+        display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #ffc107;
+        padding-bottom: 15px; margin-bottom: 25px;
+    }
+    .edit-header h2 { margin: 0; color: #333; }
+    
+    .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
+    .form-group label { font-size: 0.95rem; font-weight: bold; color: #555; margin-bottom: 8px; }
+    .form-group input, .form-group select {
+        padding: 12px; border: 1px solid #ccc; border-radius: 8px;
+        background: #f8f9fa; color: #333; font-size: 1rem; transition: 0.3s;
+    }
+    .form-group input:focus, .form-group select:focus {
+        border-color: #0d6efd; box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2); outline: none; background: white;
+    }
+    
+    .btn-container { display: flex; gap: 15px; margin-top: 10px; }
+    .btn-save { background: #198754; color: white; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer; flex: 1; transition: 0.3s; }
+    .btn-save:hover { background: #146c43; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(25,135,84,0.3); }
+    
+    .btn-cancel { background: #f8f9fa; color: #333; border: 1px solid #ccc; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: bold; text-decoration: none; text-align: center; flex: 1; transition: 0.3s; }
+    .btn-cancel:hover { background: #e2e6ea; }
+</style>
+
+<div class="edit-card">
+    <div class="edit-header">
+        <i class="fas fa-edit" style="font-size: 2rem; color: #ffc107;"></i>
+        <h2>Edit Exam Schedule</h2>
+    </div>
+
+    <form method="POST" action="/edit/exam/{{ exam.id }}">
+        <div class="form-group">
+            <label>Exam Name / Series Title</label>
+            <input type="text" name="exam_name" value="{{ exam.exam_name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Subject</label>
+            <select name="subject_id" required>
+                {% for s in subjects %}
+                    <option value="{{ s.id }}" {% if exam.subject_id == s.id %}selected{% endif %}>
+                        {{ s.course_name }} (S{{ s.semester }}) - {{ s.subject_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 15px; flex-direction: row; margin-bottom: 20px;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label>Date</label>
+                <input type="date" name="exam_date" value="{{ exam.exam_date }}" required>
+            </div>
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label>Session (FN/AN)</label>
+                <select name="exam_time" required>
+                    <option value="FN" {% if exam.exam_time == 'FN' %}selected{% endif %}>FN (Forenoon)</option>
+                    <option value="AN" {% if exam.exam_time == 'AN' %}selected{% endif %}>AN (Afternoon)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button type="submit" class="btn-save">💾 Update Schedule</button>
+            <a href="/admin/timetable" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
